@@ -1,0 +1,44 @@
+{% extends "admin/_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}Manage {{subscription.report_group.report_group_name}} Subscription Seats{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Manage {{subscription.report_group.report_group_name}} Subscription Seats</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-9">
+                <form class="form-horizontal" id="company-discount-form" role="form" method="post" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    {{ render_field(form.users, with_label=true) }}
+                    <hr>
+                    <div id="subscription_info" class="col-sm-offset-4 col-sm-8">
+                        <p>Price per seat: <strong id="subscription_price">{{subscription.get_price()|currency}}</strong></p>
+                    </div>
+                    <div id="total_info" class="col-sm-offset-4 col-sm-8"></div>
+                    {{ render_field(form.submit) }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+var price = {{subscription.get_price()}};
+var users = $('#users :selected').length;
+
+function updateTotal() {
+    users = $('#users :selected').length;
+    $("#total_info").html('<p>Total price: <strong id="total_price">$' + parseFloat(price * users, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + '</strong></p>');
+}
+$(document).ready(function() {
+    updateTotal();
+});
+$('#users').change(function() {
+    updateTotal();
+});
+</script>
+{% endblock %}

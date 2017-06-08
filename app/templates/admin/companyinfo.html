@@ -1,0 +1,208 @@
+{% extends "admin/_base.html" %}
+{% block title %}{{data.company.company_name}}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Broker/Dealer Info</h2>
+        </div>
+        <div class="col-md-6">
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation" class="active"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">Info</a></li>
+                <li role="presentation"><a href="#users" aria-controls="users" role="tab" data-toggle="tab">Users <span class="badge">{{data.company.users|length}}</span></a></li>
+                <li role="presentation"><a href="#programs" aria-controls="programs" role="tab" data-toggle="tab">Programs <span class="badge">{{data.company.valid_programs|length}}</span></a></li>
+                <li role="presentation"><a href="#subscriptions" aria-controls="subscriptions" role="tab" data-toggle="tab">Subscriptions <span class="badge">{{data.company.company_subscriptions|length}}</span></a></li>
+                <li role="presentation"><a href="#discounts" aria-controls="discounts" role="tab" data-toggle="tab">Discounts <span class="badge">{{data.company.company_discounts|length}}</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="info-well">
+    <span class="fa-stack fa-2x pull-left role-icon">
+        <i class="fa fa-square fa-stack-2x company"></i>
+        <i class="fa fa-briefcase fa-inverse fa-stack-1x"></i>
+    </span>
+    <h3 class="info-header">{{data.company.company_name}}<br/>
+        <small>Broker/Dealer</small>
+    </h3>
+</div>
+<div class="page-content">
+    <div class="container-fluid" role="tabpanel">
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="info">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive nowrap" cellspacing="0" width="100%">
+                        <tr>
+                            <th>Email Domains</th>
+                            <td>
+                                {% if data.company.valid_domains %}
+                                {% for domain in data.company.valid_domains %}
+                                {{domain.domain.domain_name}}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                                {% else %}
+                                <span class='text-muted'>None</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% if data.company.time_created %}
+                        <tr>
+                            <th>Created on</th>
+                            <td>{{data.company.time_created|datetime(format='pretty')}} by {{data.company.who_created or 'Admin'}}</td>
+                        </tr>
+                        {% endif %}
+                        {% if data.company.time_modified %}
+                        <tr>
+                            <th>Last modified</th>
+                            <td>{{data.company.time_modified|datetime(format='pretty')}} by {{data.company.who_modified}}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="users">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive table-hover nowrap" id="users-table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="expand-link"></th>
+                                <th>Email</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Role</th>
+                                <th class='text-right sort-by'>Created</th>
+                                <th class='text-right no-sort'></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for user in data.company.users %}
+                            <tr>
+                                <td></td>
+                                <td class="info-link" data-href="{{url_for('admin.user_info', user_id=user.id)}}">{{user.email}}</td>
+                                <td>{{user.first_name}}</td>
+                                <td>{{user.last_name}}</td>
+                                <td>{{user.roles[0].description}}</td>
+                                <td class="text-right" data-order="{{user.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{user.time_created|datetime(format='full')}}">{{user.time_created|datetime}}</span></td>
+                                <td class='text-right'>
+                                    <a href='{{url_for("admin.edit_user", user_id=user.id)}}' class='action-button btn btn-warning btn-xs'><span class="fa fa-pencil fa-lg fa-fw" aria-hidden="true"></span></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="programs">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive table-hover nowrap" id="programs-table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="expand-link"></th>
+                                <th>Name</th>
+                                <th>Sponsor</th>
+                                <th class='text-right sort-by'>Created</th>
+                                <th class='text-right no-sort'></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for program in data.company.valid_programs %}
+                            <tr>
+                                <td></td>
+                                <td class="info-link" data-href="{{url_for('admin.program_info', program_id=program.program_id)}}">{{program.program.program_name}}</td>
+                                <td>{{program.program.sponsor.sponsor_name}}</td>
+                                <td class="text-right" data-order="{{program.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{program.time_created|datetime(format='full')}}">{{program.time_created|datetime}}</span></td>
+                                <td class='text-right'>
+                                    <a href='{{url_for("admin.edit_program", program_id=program.program_id)}}' class='action-button btn btn-warning btn-xs admin'><span class="fa fa-pencil fa-lg fa-fw" aria-hidden="true"></span></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="subscriptions">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive table-hover nowrap" id="subscriptions-table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="expand-link"></th>
+                                <th>Group Name</th>
+                                <th class='none'>Stripe ID</th>
+                                <th class="text-right">Seats</th>
+                                <th class="text-right">Price</th>
+                                <th class="text-right sort-by">Created</th>
+                                <th class='text-right no-sort'></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for subscription in data.company.company_subscriptions %}
+                            <tr>
+                                <td></td>
+                                <td class="info-link" data-href="{{url_for('admin.group_info', report_group_id=subscription.report_group.report_group_id)}}">{{subscription.report_group.report_group_name}}</td>
+                                <td>{{subscription.stripe_id or 'N/A'}}</td>
+                                <td class='text-right'>{{subscription.seats|count}}</td>
+                                {% if subscription.get_price() < subscription.report_group.price %}
+                                <td class='text-right'><s>{{subscription.report_group.price|currency}}</s> <strong>{{subscription.get_price()|currency}}</strong></td>
+                                {% elif subscription.get_price() == 0 %}
+                                <td class='text-right'><s>{{subscription.report_group.price|currency}}</s> <strong>Free</strong></td>
+                                {% else %}
+                                <td class='text-right'>{{subscription.get_price()|currency}}</td>
+                                {% endif %}
+                                <td class="text-right" data-order="{{subscription.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.time_created|datetime(format='full')}}">{{subscription.time_created|datetime}}</span></td>
+                                <td class='text-right'>
+                                    <a href='#' data-href='{{url_for("admin.delete_company_subscription", subscription_id=subscription.company_subscription_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="discounts">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive table-hover nowrap" id="discounts-table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="expand-link"></th>
+                                <th>Group Name</th>
+                                <th class="text-right">Price</th>
+                                <th class='text-right none'>Stripe ID</th>
+                                <th class="text-right">Added By</th>
+                                <th class='text-right sort-by'>Added On</th>
+                                <th class='text-right no-sort'></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for company_discount in data.company.company_discounts %}
+                            <tr>
+                                <td></td>
+                                <td class="info-link" data-href="{{url_for('admin.group_info', report_group_id=company_discount.report_group.report_group_id)}}">{{company_discount.report_group.report_group_name}}</td>
+                                {% if company_discount.get_price() < company_discount.report_group.price %}
+                                <td class='text-right'><s>{{company_discount.report_group.price|currency}}</s> <strong>{{company_discount.get_price()|currency}}</strong></td>
+                                {% elif company_discount.get_price() == 0 %}
+                                <td class='text-right'><s>{{company_discount.report_group.price|currency}}</s> <strong>Free</strong></td>
+                                {% else %}
+                                <td class='text-right'><s>{{company_discount.get_price()|currency}}</td>
+                                {% endif %}
+                                <td class='text-right'>{{company_discount.stripe_id or 'N/A'}}</td>
+                                <td class='text-right'>{{company_discount.who_created}}</td>
+                                <td class="text-right" data-order="{{company_discount.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{company_discount.time_created|datetime(format='full')}}">{{company_discount.time_created|datetime}}</span></td>
+                                <td class='text-right'>
+                                    <a href='#' data-href='{{url_for("admin.delete_company_discount", company_discount_id=company_discount.company_discount_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="well well-sm">
+    {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+    <a href="{{url_for('admin.new_company_discount', company_id=data.company.company_id)}}" type="submit" class="btn btn-success"><span class="fa fa-plus-square" aria-hidden="true"></span> Add Discount/Access</a>
+    {% endif %}
+    <a href="{{url_for('admin.edit_company', company_id=data.company.company_id)}}" type="submit" class="btn btn-warning"><span class="fa fa-pencil" aria-hidden="true"></span> Edit Broker/Dealer</a>
+    <a href="#" data-href="{{url_for('admin.del_company', company_id=data.company.company_id)}}" type="submit" class="btn btn-danger" data-placement='top' data-toggle='confirmation'><span class="fa fa-trash" aria-hidden="true"></span> Delete Broker/Dealer</a>
+</div>
+{% endblock %}

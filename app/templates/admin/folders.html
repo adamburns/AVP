@@ -1,0 +1,46 @@
+{% extends "admin/_base.html" %}
+{% block title %}Report Folders{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Report Folders</h2>
+</div>
+<div class="page-content">
+    <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+    <div class="table-responsive" id="folders-wrapper" style="opacity: 0">
+        <table class="table table-striped table-responsive table-hover nowrap" id="folders-table" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="all expand-link"></th>
+                    <th class='all sort-by sort-asc'>Name</th>
+                    <th class='min-phone-l'>Group</th>
+                    <th class='min-tablet text-right'>Created</th>
+                    <th class='min-phone-p text-right'>Documents</th>
+                    <th class='all text-right no-sort'></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for folder in folders %}
+                <tr>
+                    <td></td>
+                    <td class="info-link" data-href="{{url_for('admin.folder_info', report_folder_id=folder.report_folder_id)}}">{{folder.report_folder_name}}</td>
+                    <td class='search-link' data-search='{{folder.report_group.report_group_name}}'>{{folder.report_group.report_group_name}}</td>
+                    <td class='text-right' data-order="{{folder.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{folder.time_created|datetime(format='full')}}">{{folder.time_created|datetime}}</span></td>
+                    <td class='text-right'>{{folder.documents|length}}</td>
+                    <td class='text-right'>
+                        <a href='{{url_for("admin.edit_folder", report_folder_id=folder.report_folder_id)}}' class='action-button btn btn-warning btn-xs admin'><span class="fa fa-pencil fa-lg fa-fw" aria-hidden="true"></span></a>
+                        {% if not folder.protected %}
+                        <a href='#' data-href='{{url_for("admin.del_folder", report_folder_id=folder.report_folder_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                        {% else %}
+                        <a href='#' class='action-button btn btn-danger btn-xs admin disabled'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="well well-sm">
+    <a href="{{url_for('admin.new_folder')}}" class="btn btn-success admin"><span class="fa fa-plus" aria-hidden="true"></span> New Folder</a>
+</div>
+{% endblock %}

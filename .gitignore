@@ -1,0 +1,9 @@
+*.pyc
+*.pyo
+*.sublime-workspace
+flask
+.sass-cache/
+.vagrant/
+*.codekit
+.webassets-cache/
+gen/

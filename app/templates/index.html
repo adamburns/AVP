@@ -1,0 +1,39 @@
+{% extends "_base.html" %}
+{% block content %}
+<div class="jumbotron gray">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-7 col-md-8">
+        <h1 class="caption-black animated fadeInDown">Advisor Vantage Point</h1>
+        <p class="sub-caption animated fadeInUp">Complex Product Due Diligence For Advisors.</p>
+        <a class="btn btn-primary btn-lg btn-learn animated fadeInUp" href="http://www.factright.com/due-diligence-reporting/advisor-vantage-point/" target="_blank">Find out more</a>
+      </div>
+      <div class="col-lg-5 col-md-4 hidden-xs hidden-sm">
+        <img class="report-stack animated fadeInRight" src="{{url_for('static', filename='images/report-stack.png')}}" alt="{{config.APP_NAME}}" />
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <a href="/request">
+      <div class="col-md-6 box-padding">
+        <div class="home-box request-box">
+          <h2>New Users</h2>
+          <p>Request access to {{config.APP_NAME}} by filling out a short questionnaire.</p>
+          <h4>Request Access <span class="fa fa-angle-right" aria-hidden="true"></h4>
+        </div>
+      </div>
+    </a>
+    <a href="/login">
+      <div class="col-md-6 box-padding">
+        <div class="home-box login-box">
+          <h2>Returning Members</h2>
+          <p>Log in to access your documents and users.</p>
+          <h4>Log In <span class="fa fa-angle-right" aria-hidden="true"></h4>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+{% endblock %}

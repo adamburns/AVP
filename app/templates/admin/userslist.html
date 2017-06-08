@@ -1,0 +1,131 @@
+{% if not dashboard %}
+{% extends "admin/_base.html" %}
+{% block title %}Users{% endblock %}
+{% endif %}
+{% block content %}
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>
+                {% if current_user.has_role('brokeradmin') or current_user.has_role('broker') %}
+                {% if dashboard %}Recent {% else %}{{current_user.company.company_name}}{% endif %} Users
+                {% else %}
+                {% if dashboard %}Recent {% else %}All{% endif %} Users
+                {% endif %}
+            </h2>
+        </div>
+        <div class="col-md-6">
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation" class="active"><a href="#activeusers" aria-controls="activeusers" role="tab" data-toggle="tab">Active</a></li>
+                {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                <li role="presentation"><a href="#pendingusers" aria-controls="pendingusers" role="tab" data-toggle="tab">Pending <span class="badge">{{data.pending_users|length}}</span></a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="page-content tab-content">
+    <div role="tabpanel" class="tab-pane active" id="activeusers">
+        <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+        <div class="table-responsive" id="users-wrapper" style="opacity: 0">
+            <table class="table table-striped table-responsive table-hover nowrap" id="users-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class="all">Email</th>
+                        <th class="min-phone-l">First Name</th>
+                        <th class="min-phone-l">Last Name</th>
+                        <th class="min-phone-l">Broker/Dealer</th>
+                        <th class="min-phone-p">Role</th>
+                        <th class="min-phone-p text-right">Subscriptions</th>
+                        <th class="min-tablet text-right sort-by">Created</th>
+                        <th class="min-phone-p text-right">Logins</th>
+                        <th class="min-phone-p text-right">Confirmed</th>
+                        <th class="min-phone-p text-right">Active</th>
+                        <th class="all text-right no-sort"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in data.users %}
+                    <tr{% if not user.active %} class='inactive{% if user.time_deleted %} danger{% endif %}'{% endif %}>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.user_info', user_id=user.id)}}">{{user.email}}</td>
+                        <td>{{user.first_name}}</td>
+                        <td>{{user.last_name}}</td>
+                        <td class="search-link" data-search='{{user.company.company_name}}'>{{user.company.company_name}}</td>
+                        <td class="search-link" data-search='{{user.roles[0].description}}'>{{user.roles[0].description}}</td>
+                        <td class="text-right">{{user.subscriptions|count}}</span></td>
+                        <td class="text-right" data-order="{{user.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{user.time_created|datetime(format='full')}}">{{user.time_created|datetime}}</span></td>
+                        <td class="text-right"><span data-toggle="tooltip" data-placement="top" title="Last login: {{ user.last_login_at|datetime }}">{{user.login_count}}</span></td>
+                        <td class="text-right">{% if user.confirmed_at %}<span class="fa fa-check" aria-hidden="true"></span>{% endif %}</td>
+                        <td class="text-right">{% if user.active %}<span class="fa fa-check" aria-hidden="true"></span>{% endif %}</td>
+                        <td class="text-right">
+                            <a href='{{url_for("admin.edit_user", user_id=user.id)}}' class='action-button btn btn-warning btn-xs brokeradmin'><span class="fa fa-pencil fa-lg fa-fw" aria-hidden="true"></span></a>
+                            <a data-href='{{url_for("admin.del_user", user_id=user.id)}}' class='action-button btn btn-danger btn-xs brokeradmin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+    <div role="tabpanel" class="tab-pane" id="pendingusers">
+        <div class="table-responsive" id="pending_users-wrapper" style="opacity: 0">
+            <table class="table table-striped table-responsive table-hover nowrap" id="pending_users-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class="all">Email</th>
+                        <th class="min-phone-l">First Name</th>
+                        <th class="min-phone-l">Last Name</th>
+                        <th class="min-phone-p">Broker/Dealer</th>
+                        <th class="min-phone-p">CRD Number</th>
+                        <th class="min-phone-p">Phone</th>
+                        <th class="min-tablet text-center">Status</th>
+                        <th class="min-tablet text-right sort-by">Requested</th>
+                        <th class="all text-right no-sort"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for user in data.pending_users %}
+                    <tr>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.user_info', user_id=user.id)}}">{{user.email}}</td>
+                        <td>{{user.first_name}}</td>
+                        <td>{{user.last_name}}</td>
+                        <td class="search-link" data-search='{{user.company.company_name}}'>{{user.company.company_name}}</td>
+                        <td>{{user.crd_number}}</td>
+                        <td>{{user.phone}}</td>
+                        {% if user.review_status == 'APPROVED' %}
+                        <td class="text-center bg-success text-success">Approved</td>
+                        {% elif user.review_status == 'PENDING' %}
+                        <td class="text-center bg-warning text-warning">Pending</td>
+                        {% elif user.review_status == 'DENIED' %}
+                        <td class="text-center bg-danger text-danger">Denied</td>
+                        {% else %}
+                        <td class="text-center bg-warning text-warning">{{user.review_status.title()}}</td>
+                        {% endif %}
+                        <td class="text-right" data-order="{{user.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{user.time_created|datetime(format='full')}}">{{user.time_created|datetime}}</span></td>
+                        <td class="text-right">
+                            <a href='{{url_for("admin.approve_user", user_id=user.id)}}' class='action-button btn btn-success btn-xs admin'><span class="fa fa-check fa-lg fa-fw" aria-hidden="true"></span></a>
+                            <a href='{{url_for("admin.deny_user", user_id=user.id)}}' class='action-button btn btn-danger btn-xs admin'><span class="fa fa-times fa-lg fa-fw" aria-hidden="true"></span></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<div class="page-footer">
+    <div class="well well-sm">
+        <a href="{{url_for('admin.new_user')}}" class="btn btn-success brokeradmin"><span class="fa fa-plus" aria-hidden="true"></span> New</a>
+        <a href="{{url_for('admin.upload_users')}}" class="btn btn-success brokeradmin"><span class="fa fa-user-plus" aria-hidden="true"></span> Upload</a>
+        {% if dashboard %}
+        <a href="{{url_for('admin.users_list')}}" class="btn btn-info"><span class="fa fa-users" aria-hidden="true"></span> Manage</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

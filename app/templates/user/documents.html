@@ -1,0 +1,104 @@
+{% if not dashboard %}
+{% extends "user/_base.html" %}
+{% block title %}Reports{% endblock %}
+{% endif %}
+{% block content %}
+<div class="page-header">
+    <h2>{% if dashboard %}Recent {% endif %}Reports</h2>
+</div>
+<div class="page-content">
+    <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+    <div class="table-responsive" id="reports-wrapper" style="opacity: 0">
+        <table class="table table-striped table-responsive table-hover nowrap" id="reports-table" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="all">Name</th>
+                    <th class="min-phone-l">Group</th>
+                    <th class="min-phone-l">Program</th>
+                    <th class="min-tablet text-right sort-by">Uploaded</th>
+                    <th class="all text-right no-sort"></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for document in data.documents %}
+                <tr>
+                    <td class="info-link" data-href="{{url_for('user.document_info', document_id=document.document_id)}}">
+                        {% if 'audio' in document.document_type %}
+                        <span class="fa fa-fw file-audio fa-file-audio-o" aria-hidden="true"></span>
+                        {% elif 'image' in document.document_type %}
+                        <span class="fa fa-fw file-image fa-file-image-o" aria-hidden="true"></span>
+                        {% elif 'pdf' in document.document_type %}
+                        <span class="fa fa-fw file-pdf fa-file-pdf-o" aria-hidden="true"></span>
+                        {% elif 'text' in document.document_type %}
+                        <span class="fa fa-fw file-text fa-file-text-o" aria-hidden="true"></span>
+                        {% elif 'video' in document.document_type %}
+                        <span class="fa fa-fw file-movie fa-file-movie-o" aria-hidden="true"></span>
+                        {% else %}
+                        <span class="fa fa-fw file-other fa-file-code-o" aria-hidden="true"></span>
+                        {% endif %}
+                        {% if document.is_new() %}<strong>New:</strong> {% endif %}
+                        {{document.document_display_name}}
+                    </td>
+                    <td class='search-link' data-search='{{document.report_folder.report_folder_name}}'>
+                        {{document.report_folder.report_folder_name}} ({{document.report_folder.report_group.report_group_name}})
+                    </td>
+                    <td class='search-link' data-search='{{document.program.program_name}}'>
+                        {{document.program.program_name}}
+                    </td>
+                    <td class="text-right" data-order="{{document.time_created|datetime(format='sort')}}">
+                        <span data-toggle="tooltip" data-placement="top" title="{{document.time_created|datetime(format='full')}}">{{document.time_created|datetime}}</span>
+                    </td>
+                    <td class="text-right" data-orderable='false'>
+                        {% if not document.is_subscribed() and not document.get_purchase() and not document.is_free_access() %}
+                        {% if document.document_type == 'application/pdf' %}
+                        <a href='/preview/{{document.document_id}}' class='fb-document action-button btn btn-primary btn-xs' data-toggle='tooltip' data-html='true' title='You are not subscribed<br/>to this report group,<br/>but you can view the<br/>first page for free.' data-viewport='.page-content-holder' data-placement='left'>Preview <span class="fa fa-search fa-lg fa-fw"></span></a>
+                        {% else %}
+                        <a class='action-button btn btn-primary btn-xs action-disabled' data-toggle='tooltip' data-html='true' title='You are not subscribed<br/>to this report group.<br/>You can only view previews<br/>of PDF reports.' data-viewport='.page-content-holder' data-placement='left'>Preview <span class="fa fa-search fa-lg fa-fw"></span></a>
+                        {% endif %}
+                        {% if document.stripe_sku_id %}
+                        {% if not document.is_in_cart() %}
+                        <a class='cart-button addtocart action-button btn btn-xs btn-primary' data-document='{{document.document_id}}' data-toggle="tooltip" data-placement="top" title="{{document.price|currency}}">
+                            <span class="fa fa-cart-plus" aria-hidden="true"></span> Add to Cart
+                        </a>
+                        {% else %}
+                        <a class='cart-button removefromcart action-button btn btn-xs btn-danger' data-document='{{document.document_id}}' data-toggle="tooltip" data-placement="top" title="{{document.price|currency}}">
+                            <span class="fa fa-minus" aria-hidden="true"></span> Remove from Cart
+                        </a>
+                        {% endif %}
+                        {% else %}
+                        <a class='action-button btn btn-xs btn-primary action-disabled' data-toggle="tooltip" data-placement="top" data-html="true" title="You must purchase<br/>a subscription<br/>to this report group<br/>to view this report.">
+                            <span class="fa fa-cart-plus" aria-hidden="true"></span> Add to Cart
+                        </a>
+                        {% endif %}
+                        {% elif 'video' in document.document_type or 'audio' in document.document_type %}
+                        <a href='/view/{{document.document_id}}' class='fb-iframe action-button btn btn-info btn-xs'>
+                            Play <span class="fa fa-youtube-play fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        {% elif 'image' in document.document_type %}
+                        <a href='/view/{{document.document_id}}' class='fb-image action-button btn btn-info btn-xs'>
+                            View <span class="fa fa-eye fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        <a href='/download/{{document.document_id}}' class='action-button btn btn-primary btn-xs'>
+                            <span class="fa fa-download fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        {% else %}
+                        <a href='/view/{{document.document_id}}' class='fb-document action-button btn btn-info btn-xs'>
+                            View <span class="fa fa-eye fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        <a href='/download/{{document.document_id}}' class='action-button btn btn-primary btn-xs'>
+                            <span class="fa fa-download fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="well well-sm text-right">
+    {% if dashboard %}
+    <a href="{{url_for('user.documents_list')}}" class="btn btn-info"><span class="fa fa-file fa-fw" aria-hidden="true"></span> View All Reports</a>
+    {% endif %}
+</div>
+{% endblock %}

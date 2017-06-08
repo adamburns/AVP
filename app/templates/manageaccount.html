@@ -1,0 +1,23 @@
+{% extends "_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}Manage Account{% endblock %}
+{% block content %}
+<div class="faded-background animated fadeIn vertical-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-offset-2 col-md-8 pop-box">
+                <h2 class="text-center">Manage Account</h2>
+                <form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+                    {% for field in form %}
+                        {{ render_field(field, with_label=true) }}
+                    {% endfor %}
+                </form>
+                <div class="well well-sm">
+                    <script>document.write('<a class="btn btn-default" href="' + document.referrer + '"><i class="fa fa-fw fa-arrow-left"></i> Back</a>');</script>
+                    <a href="{{url_for_security('change_password')}}" class="btn btn-warning pull-right"><span class="fa fa-refresh" aria-hidden="true"></span> Change Password</a>
+                </div>
+            </div>
+        </div>
+    </div>    
+</div>
+{% endblock %}

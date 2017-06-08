@@ -1,0 +1,49 @@
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+  <div class="container{% if 'admin' in request.path or 'user' in request.path or 'help' in request.path %}-fluid{%endif%}">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{url_for('index')}}"><img src="{{ url_for('static', filename='images/logo-nav.gif') }}" alt="{{config.APP_NAME}}" /></a>
+    </div>
+    <div class="navbar-collapse collapse no-transition">
+      <ul class="nav navbar-nav pull-right">
+        {% if current_user.is_authenticated %}
+          {% if config.DEMO_MODE %}
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Demo Role <span class="caret"></span></a>
+            <ul class="dropdown-menu" style="margin-top: 35px">
+              <li><a href="{{url_for('demo_change_role', role_id=1)}}">Super Admin</a></li>
+              <li><a href="{{url_for('demo_change_role', role_id=2)}}">Admin</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="{{url_for('demo_change_role', role_id=3)}}">Home Office Admin</a></li>
+              <li><a href="{{url_for('demo_change_role', role_id=4)}}">Broker/Dealer</a></li>
+              <li role="separator" class="divider"></li>
+              <li><a href="{{url_for('demo_change_role', role_id=5)}}">All-Access Advisor</a></li>
+              <li><a href="{{url_for('demo_change_role', role_id=6)}}">Advisor</a></li>
+              <li><a href="{{url_for('demo_change_role', role_id=7)}}">User</a></li>
+            </ul>
+          </li>
+          {% endif %}
+          <li><a href="{{url_for('account')}}" data-toggle="tooltip" data-placement="left" title="{{ current_user.email }}">Hello, {{ current_user.first_name }}!</a></li>
+          {% if current_user.has_role('superadmin') or current_user.has_role('admin') or current_user.has_role('brokeradmin') or current_user.has_role('broker') %}
+            <li><a href="{{url_for('admin.dashboard')}}">Dashboard</a></li>
+          {% else %}
+            <li><a href="{{url_for('user.dashboard')}}">Dashboard</a></li>
+            <li><a href="{{url_for('user.shopping_cart')}}">Cart <span class="fa fa-shopping-cart badge"> <span id="cart-count">{{session['cart']|count}}</span></span></a></li>
+          {% endif %}
+          <li><a href="{{url_for('help_index')}}" target="_blank">Help</a></li>
+          <li><a href="{{url_for_security('logout')}}"><span class="fa fa-sign-out" aria-hidden="true"></span> Log Out</a></li>
+        {% else %}
+          <li><a href="{{config.COMPANY_LINK}}" target="_blank">About Us</a></li>
+          <li><a href="{{config.CONTACT_LINK}}" target="_blank">Contact</a></li>
+          <li><a href="{{url_for('help_index')}}" target="_blank">Help</a></li>
+          <li><a href="{{url_for_security('login')}}"><span class="fa fa-sign-in" aria-hidden="true"></span> Log In</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</div>

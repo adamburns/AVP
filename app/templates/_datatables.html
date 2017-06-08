@@ -1,0 +1,133 @@
+<script type="text/javascript">
+$(document).ready(function() {
+    $("table[id$='-table']").each(function(index) {
+        var sortColumn = $(this).find(".sort-by").index();
+        var sortDir = "desc";
+        if ($(this).find(".sort-asc").length > 0)
+            sortDir = "asc";
+        var lengthMenu = [ [15, 50, 100, -1], [15, 50, 100, "All"] ];
+        if ($(this).data("table-limit") > 0)
+            lengthMenu = [ [$(this).data("table-limit"), 50, 100, -1], [$(this).data("table-limit"), 50, 100, "All"] ];
+        var dataType = $(this).attr("id").split("-")[0].replace("_", " ");
+        var table = $(this).dataTable({
+            "columnDefs": [
+                { "className": "control", "orderable": false, "targets": "expand-link" },
+                { "targets": "no-sort", "orderable": false }
+            ],
+            "order": [[ sortColumn, sortDir ]],
+            "language": {
+                "info": "Showing _START_ to _END_ of _TOTAL_ " + dataType,
+                "infoEmpty": "No " + dataType + " available",
+                "infoFiltered": "(filtered from _MAX_ " + dataType + ")",
+                "lengthMenu": "Display _MENU_ " + dataType,
+                "search": "",
+                "searchPlaceholder": "Search...",
+                "zeroRecords": "No " + dataType + " available",
+                "select": {
+                    "rows": {
+                        "_": "%d " + dataType + " selected",
+                        "1": "",
+                        "0": "",
+                    }
+                }
+            },
+            "responsive": {
+                "details": {
+                    "type": "column"
+                }
+            },
+            {% if dashboard or simpletable %}
+            "paging": false,
+            "ordering": false,
+            "info": false,
+            "filter": false,
+            {% else %}
+            "select": true,
+            "dom": "<'row'<'col-sm-4'l><'col-sm-4 text-center'B><'col-sm-4'f>>" +
+                   "<'row'<'col-sm-12'tr>>" +
+                   "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+            "buttons": [
+                {
+                    "extend": "colvis",
+                    "columns": ":not(:last-child):not(:first-child)",
+                    "text": "<i class='fa fa-fw fa-columns'></i> View"
+                },
+                {
+                    "extend": "copy",
+                    "text": "<i class='fa fa-fw fa-clipboard'></i> Copy"
+                },
+                {
+                    "extend": "csv",
+                    "text": "<i class='fa fa-fw fa-file-text-o'></i> Save"
+                }
+            ],
+            "lengthMenu": lengthMenu,
+            {% endif %}
+        });
+        $("#" + dataType.replace(" ", "_") + "-wrapper").css("opacity", 1);
+    });
+    $(".loader").remove();
+    $('.dataTables_wrapper').find('.dataTables_filter').append($('<span />', {
+        'class': 'fa fa-close search-close close hidden'
+    }));
+    $('.search-close').click(function() {
+        $('.dataTable').DataTable().search('').draw();
+        $('input[type=search]').keyup();
+        $('.selected').removeClass('selected');
+    });
+    $('.search-link[data-search=""]').removeClass('search-link');
+    {% if dashboard %}
+    $('.search-link').removeClass('search-link');
+    {% endif %}
+    $(document).on('click', '.search-link', function() {
+        var query = $(this).data('search');
+        $('.dataTable').DataTable().search(query).draw();
+        $('input[type=search]').keyup();
+    });
+    $(document).on('click', '.info-link', function() {
+        window.location.href = $(this).data('href');
+    });
+    $('input[type=search]').keyup(function() {
+        if ($(this).val()) {
+            $(this).addClass('search-expanded');
+            $('.search-close').removeClass('hidden');
+        } else {
+            $(this).removeClass('search-expanded');
+            $('.search-close').addClass('hidden');
+        }
+    });
+    $("tr").click(function() {
+      $(this).parent().children().removeClass("selected");
+        $(this).addClass("selected");
+    });
+    $('.nav-pills a').click(function (e) {
+        var tables = $('.dataTable').DataTable();
+        tables.search('').draw();
+        $('input[type=search]').keyup();
+        $('.selected').removeClass('selected');
+        tables.responsive.recalc();
+    });
+});
+$(document).on('mouseenter', "td", function() {
+    var $this = $(this);
+    if(this.offsetWidth < this.scrollWidth && !$this.attr('title')) {
+        $this.tooltip({
+            title: $this.text(),
+            placement: "top",
+            container: "body"
+        });
+        $this.tooltip('show');
+    }
+});
+$(document).on('mouseenter', "th", function() {
+    var $this = $(this);
+    if(this.offsetWidth < this.scrollWidth && !$this.attr('title')) {
+        $this.tooltip({
+            title: $this.text(),
+            placement: "top",
+            container: "body"
+        });
+        $this.tooltip('show');
+    }
+});
+</script>

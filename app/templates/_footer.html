@@ -1,0 +1,6 @@
+<footer class="footer">
+  <div class="container{% if 'admin' in request.path or 'user' in request.path %}-fluid{%endif%}">
+    <p>{{ config.APP_STYLED_NAME or config.APP_NAME }}</p>
+    <p class="copyright">Copyright © {{ get_year() }} <a href='{{config.COMPANY_LINK}}' target='_blank'>{{config.COMPANY_NAME}}.</a> All rights reserved. Powered by <a href='{{config.OWNER_LINK}}' target='_blank'>{{config.OWNER_NAME}}.</a>{% if config.CONTACT_LINK %} Questions? <a href='{{config.CONTACT_LINK}}' target='_blank'>Contact us.</a>{% endif %}</p>
+  </div>
+</footer>

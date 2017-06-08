@@ -1,0 +1,8 @@
+{% extends "security/email/_base.html" %}
+{% block content %}
+<p>Thank you for requesting access to {{ config.APP_NAME }}, the industry’s leading portal for complex product due diligence for advisors.</p>
+
+<p>Please confirm your email using the button below:</p>
+
+<p><a href="{{ confirmation_link }}" class='btn'>Confirm my account</a></p>
+{% endblock %}

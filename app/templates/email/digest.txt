@@ -1,0 +1,9 @@
+{{user.first_name}},
+
+There {%if documents|length > 1%}are new documents{% else %}is a new document{% endif %} available on {{config.APP_NAME}}:
+
+{% for document in documents %}
+{{document.document_display_name}} ({{document.report_folder.report_folder_name}} for {{document.program.program_name}})
+{% endfor %}
+
+Log in and view documents at {{url_for('user.documents_list', _external=True)}}

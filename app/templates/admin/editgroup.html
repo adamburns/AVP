@@ -1,0 +1,32 @@
+{% extends "admin/_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}Edit {{group.report_group_name}}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Edit Subscription Group</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-9">
+                <form class="form-horizontal" id="edit-group-form" role="form" method="post" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    {{ render_field(form.report_group_name, with_label=true) }}
+                    {{ render_field(form.price, with_label=true, group_addon_icon='fa fa-fw fa-dollar') }}
+                    {{ render_field(form.submit) }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    if ($('#price').val() == '')
+        $('#price').val(0);
+    if ($('#price').val() > 0)
+        $('#price').attr('readonly', true);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "admin/_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}Upload Document{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>{{ title|safe }}</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-9">
+                <form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    {% if form.file %}
+                    {{ render_field(form.file, with_label=true) }}
+                    {% endif %}
+                    {{ render_field(form.document_display_name, with_label=true) }}
+                    <hr>
+                    {{ render_field(form.public, with_label=true) }}
+                    <div id="subscription-options">
+                        <div class="col-sm-offset-4 col-sm-8 form-separator"><strong>or</strong></div>
+                        {{ render_field(form.report_folder, with_label=true) }}
+                        {{ render_field(form.program, with_label=true) }}
+                        {{ render_field(form.price, with_label=true, group_addon_icon='fa fa-fw fa-usd') }}
+                    </div>
+                    <hr>
+                    {{ render_field(form.submit) }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+function checkPublic() {
+    if ($('#public').is(':checked')) {
+        var report_folder = $('select[name="report_folder"]')[0].selectize;
+        report_folder.setValue('__None');
+        report_folder.disable();
+        var program = $('select[name="program"]')[0].selectize;
+        program.setValue('__None');
+        program.disable();
+        $('input[name="price"]').prop('disabled', true);
+        $('#subscription-options').slideUp();
+    } else {
+        $('select[name="report_folder"]')[0].selectize.enable();
+        $('select[name="program"]')[0].selectize.enable();
+        $('input[name="price"]').prop('disabled', false);
+        $('#subscription-options').slideDown();
+    }
+}
+
+$(function() {
+    $("#file").change(function (){
+        var path = $(this).val();
+        var nOffset = Math.max(0, Math.max(path.lastIndexOf('\\'), path.lastIndexOf('/')));
+        var eOffset = path.lastIndexOf('.');
+        if(eOffset < 0)
+            eOffset = path.length;
+        var fileName = path.substring(nOffset > 0 ? nOffset + 1 : nOffset, eOffset)
+        $("#document_display_name").val(fileName).focus();
+    });
+    $(document).ready(function() {
+        checkPublic();
+    });
+    $('#public').change(function() {
+        checkPublic();
+    });
+});
+</script>
+{% endblock %}

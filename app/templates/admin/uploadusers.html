@@ -1,0 +1,60 @@
+{% extends "admin/_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}Upload Users{% endblock %}
+{% block content %}
+{% if data.newusers %}
+<div class="page-header">
+    <h2>{% if data.active %}Active{% else %}Disabled{% endif %} users uploaded to {{data.company.company_name}}:</h2>
+</div>
+<div class="page-content no-well">
+    <div class="table-responsive">
+        <table class="table table-striped table-responsive table-hover nowrap" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Role</th>
+                    <th>Errors</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for user in data.newusers %}
+                <tr{% if user.error %} class='danger'{% endif %}>
+                    <td>{{user.email}}</td>
+                    <td>{{user.first_name}}</td>
+                    <td>{{user.last_name}}</td>
+                    <td>{{user.role}}</td>
+                    <td>{{user.error}}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+<div class="page-header">
+    <h2>Bulk User Upload</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-9">
+                <div class="col-md-offset-4 col-md-8"><p><strong>Get started with a sample CSV:</strong> <a href="{{ url_for('static', filename='users_template.csv') }}" class="btn btn-info btn-xs" style="margin-left: 12px"><span class="fa fa-fw fa-download"></span> CSV template</a></p><hr></div>
+                <form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+                    {% for field in form %}
+                        {{ render_field(field, with_label=true) }}
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{% if current_user.has_role('brokeradmin') %}
+<script>
+    $('#company_id').parent().parent().hide();
+</script>
+{% endif %}
+{% endblock %}

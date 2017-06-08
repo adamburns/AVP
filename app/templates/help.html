@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="{{config.COMPANY_NAME}}">
+
+    <title>Help - {{config.APP_NAME}}</title>
+
+    {% assets "panel_css" %}
+      <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
+    {% endassets %}
+    <style>
+    .bs-callout {
+    margin: 20px 0;
+    padding: 15px 30px 15px 15px;
+    border-left: 5px solid #eee;
+    }
+    .bs-callout h1,
+    .bs-callout h2,
+    .bs-callout h3,
+    .bs-callout h4,
+    .bs-callout h5,
+    .bs-callout h6 {
+    margin-top: 0;
+    }
+
+    .bs-callout-danger h1,
+    .bs-callout-danger h2,
+    .bs-callout-danger h3,
+    .bs-callout-danger h4,
+    .bs-callout-danger h5,
+    .bs-callout-danger h6 {
+    color: #B94A48;
+    }
+
+    .bs-callout-warning h1,
+    .bs-callout-warning h2,
+    .bs-callout-warning h3,
+    .bs-callout-warning h4,
+    .bs-callout-warning h5,
+    .bs-callout-warning h6 {
+    color: #C09853;
+    }
+
+    .bs-callout-info h1,
+    .bs-callout-info h2,
+    .bs-callout-info h3,
+    .bs-callout-info h4,
+    .bs-callout-info h5,
+    .bs-callout-info h6 {
+    color: #3A87AD;
+    }
+
+    .bs-callout-success h1,
+    .bs-callout-success h2,
+    .bs-callout-success h3,
+    .bs-callout-success h4,
+    .bs-callout-success h5,
+    .bs-callout-success h6 {
+    color: #3C763D;
+    }
+
+    .bs-callout p:last-child {
+    margin-bottom: 0;
+    }
+
+    .bs-callout code,
+    .bs-callout .highlight {
+    background-color: #fff;
+    }
+
+    /* Themes for different contexts */
+    .bs-callout-danger {
+    background-color: #fcf2f2;
+    border-color: #dFb5b4;
+    }
+    .bs-callout-warning {
+    background-color: #fefbed;
+    border-color: #f1e7bc;
+    }
+    .bs-callout-info {
+    background-color: #f0f7fd;
+    border-color: #d0e3f0;
+    }
+    .bs-callout-success {
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+    }
+    .nav-sidebar>li>a {
+    padding: 4px 30px;
+    }
+    </style>
+    <link rel="shortcut icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.png') }}">
+    <link href="//fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet" type="text/css">
+  </head>
+
+  <body data-spy="scroll" data-offset="80" data-target=".sidebar">
+    <div id="outdated"></div>
+    {% include '_navbar.html' %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar" id="helpSidebar">
+          <div class="sidebar-shadow">
+            <ul class="nav nav-sidebar">
+              <li><h2 class="sidebar-header">Documentation</h2></li>
+              <li><a href="#home">Home</a></li>
+              <li><a href="#accounts">Accounts</a></li>
+              <li><a href="#request">Request Access</a></li>
+            </ul>
+            {% if current_user.has_role('superadmin') or current_user.has_role('admin') or current_user.has_role('brokeradmin') or current_user.has_role('broker') %}
+            <ul class="nav nav-sidebar">
+              <li><h2 class="sidebar-header">Admin Panel</h2></li>
+              <li><a href="#admin-overview">Overview</a></li>
+              <li><a href="#admin-dashboard">Dashboard</a></li>
+              <li><a href="#admin-users">Users</a></li>
+              <li><a href="#admin-documents">Documents</a></li>
+              <li><a href="#admin-validprograms">Valid Programs</a></li>
+            </ul>
+            {% endif %}
+            {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+            <ul class="nav nav-sidebar">
+              <li><h2 class="sidebar-header">Data</h2></li>
+              <li><a href="#data-overview">Overview</a></li>
+              <li><a href="#data-companies">Broker/Dealers</a></li>
+              <li><a href="#data-programs">Programs</a></li>
+              <li><a href="#data-folders">Report Folders</a></li>
+              <li><a href="#data-groups">Subscription Groups</a></li>
+              <li><a href="#data-sponsors">Sponsors</a></li>
+            </ul>
+            {% endif %}
+            <ul class="nav nav-sidebar">
+              <li><h2 class="sidebar-header">User Panel</h2></li>
+              <li><a href="#user-overview">Overview</a></li>
+              <li><a href="#user-dashboard">Dashboard</a></li>
+              <li><a href="#user-documents">Documents</a></li>
+              <li><a href="#user-subscriptions">Subscriptions</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+              <li><h2 class="sidebar-header">Account</h2></li>
+              <li><a href="#manage">Manage Account</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" id="main">
+          <div class="container-fluid">
+            <div class="row">
+              <div class="col-md-8">
+                <div id="home">
+                  <h1 class='page-header'>{{config.APP_NAME}} Documentation</h1>
+                  <p>{{config.APP_NAME}} is a tool for advisors to view complex product due diligence documents uploaded by {{config.COMPANY_NAME}} administrators. {{config.APP_NAME}} can ultimately be used to administer any type of document that {{config.COMPANY_NAME}} wants to sell to its user community.  Documents are part of Subscription Groups (alternatively, an Admin can set a specific price for a specific document), which may require a paid subscription to access.  Documents can also be made available “free of charge” to users of the system.</p>
+                  <div class="bs-callout bs-callout-info">
+                    <h4><strong>Registered Users:</strong> Dynamic documentation</h4>
+                    <p>Log in to view documentation for features and procedures specific to your role.</p>
+                  </div>
+                  <h2>Home</h2>
+                  <p>The home page has some basic information and links to log in or request access.</p>
+                  {% if current_user.has_role('superadmin') %}
+                  <div class="bs-callout bs-callout-info">
+                    <h4><strong>Super Admins:</strong> Edit the Home Page</h4>
+                    <p>The index file at <code>app/templates/index.html</code> can be edited to customize the home page. The index is fully customizable and by default does not use any information from the config file.</p>
+                  </div>
+                  {% endif %}
+                </div>
+                <div id="accounts">
+                  <h2>Accounts</h2>
+                  <p>Accounts are created by {{config.COMPANY_NAME}} admins and broker/dealers created beneath them.</p>
+                  <p>New users receive an email with a link to log in and set their initial password. Existing users can change their name, email address, notification settings and other preferences from the <a href="#manage">Manage Account</a> page.</p>
+                  <div class="bs-callout bs-callout-danger">
+                    <h4>Trouble logging in?</h4>
+                    <p>You can <a href='/reset' target='_blank'>reset your password here.</a></p>
+                    <p>If your account has never been activated, you can <a href='/confirm' target='_blank'>resend your email confirmation here.</a></p>
+                  </div>
+                  {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                  <h3 id="roles">Roles</h3>
+                  <p>Each user has a Role, assigned by a user of a higher Role. Roles have the following limitations:</p>
+                  <div class="table-responsive">
+                    <table class="table table-bordered table-condensed">
+                      <tr><th></th><th>View All Documents</th><th>Upload Documents</th><th>Manage Data</th><th>Manage Broker/Dealers</th><th>Manage Users</th><th>Manage Subscriptions</th></tr>
+                      <tr><th>Super Admin</th><td class="success">Yes</td><td class="success">Yes</td><td class="success">Yes</td><td class="success">Yes</td><td class="success">All Roles</td><td class="success">Yes</td></tr>
+                      <tr><th>Admin</th><td class="success">Yes</td><td class="success">Yes</td><td class="success">Yes</td><td class="success">Yes</td><td class="warning">All but Super Admins</td><td class="success">Yes</td></tr>
+                      <tr><th>Home Office Admin</th><td class="warning">With watermark</td><td class="danger">No</td><td class="danger">No</td><td class="danger">No</td><td class="warning">Only within Broker/Dealer, with approval</td><td class="warning">View only</td></tr>
+                      <tr><th>Broker/Dealer</th><td class="warning">With watermark</td><td class="danger">No</td><td class="danger">No</td><td class="danger">No</td><td class="warning">View only</td><td class="warning">View only</td></tr>
+                      <tr><th>All-Access Advisor</th><td class="warning">With watermark</td><td class="danger">No</td><td class="danger">No</td><td class="danger">No</td><td class="warning">View only</td><td class="warning">Self only</td></tr>
+                      <tr><th>Advisor</th><td class="warning">Within programs, with watermark</td><td class="danger">No</td><td class="danger">No</td><td class="danger">No</td><td class="danger">No</td><td class="warning">Self only</td></tr>
+                    </table>
+                  </div>
+                  {% endif %}
+                </div>
+                <div id="request">
+                  <h2>Request Access</h2>
+                  <p>New users must request access to the site using the Request Access form.</p>
+                  <p>Users must enter a valid name, email address and advisor CRD number. If the email address is from a recognized domain, the Broker/Dealer field will auto-populate. Choosing None/Other will display a Broker/Dealer or RIA Name field for manual entry.</p>
+                  <p>Specified admins at {{config.COMPANY_NAME}} will receive an email alert.</p>
+                  {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                  <div class="bs-callout bs-callout-info">
+                    <h4><strong>Admins:</strong> Broker/Dealer List</h4>
+                    <p>The broker/dealer list will auto-populate with Broker/Dealers created in the Admin Panel. Be sure to add email domains to each broker/dealer auto-fill this field for new users.</p>
+                  </div>
+                  {% endif %}
+                  {% if current_user.has_role('superadmin') or current_user.has_role('admin') or current_user.has_role('brokeradmin') %}
+                  <div class="bs-callout bs-callout-info">
+                    <h4><strong>Admins:</strong> Pre-approving Accounts</h4>
+                    <p>Users created in the Admin Panel will be <em>pre-approved</em>. Completing the Request Access form will activate their account and send their initial login email.</p>
+                    <p>Note that only new accounts can use this form. Forcefully deactivated accounts cannot use this process to reactivate their account.</p>
+                  </div>
+                  {% endif %}
+                </div>
+                {% if current_user.has_role('superadmin') or current_user.has_role('admin') or current_user.has_role('brokeradmin') or current_user.has_role('broker') %}
+                <div id="admin-overview">
+                  <h1 class='page-header'>Admin Panel</h1>
+                  <p><strong>Super Admins</strong>, <strong>Admins</strong>, <strong>Home Office Admins</strong> and <strong>Broker/Dealers</strong> have access to the Admin Panel. The Admin Panel is used to manage documents and users. Admin panel features are available within the sidebar on the left, and vary based on the user's <a href="#roles">Role</a>.</p>
+                </div>
+                <div id="admin-dashboard">
+                  <h2>Dashboard</h2>
+                  <p>The Dashboard provides an overview of recent users and documents. By default, the 5 most recent of each are displayed. A sum total of all users and documents is displayed at the top of each widget.</p>
+                  <p>You can quickly view or manage users and documents using the buttons that appear upon rolling over each table row. You can also quickly Add or Upload users and documents from the toolbar buttons, or click Manage to go into the full Users/Documents management pages.</p>
+                </div>
+                <div id="admin-users">
+                  <h2>Users</h2>
+                  <p>You can view, add and remove Users from this page. <strong>Admins</strong> can manage all users, while <strong>Home Office Admins</strong> can only edit users within their broker/dealer.</p>
+                  <p>Filter by Broker/Dealer or Role by clicking their names within the table. Search any field using the Search field above the table.</p>
+                  <h3>Adding a User</h3>
+                  <p>Click the <span class="fa fa-plus text-success"> New</span> button to create a new user. Enter the user's email address, first name, last name, broker/dealer, <a href="#roles">role</a>, and active status.</p>
+                  <div class="bs-callout bs-callout-info">
+                    <h4>Active or Inactive?</h4>
+                    <p>New users can be <em>active</em> or <em>inactive</em>. <em>Active</em> users are sent an email verification and can log in immediately. <em>Inactive</em> users are 'pre-registered' and must <a href="#request">request access</a> before they can log in.</p>
+                  </div>
+                  <h3>Bulk Uploading Users</h3>
+                  <p>Click the <span class="fa fa-user-plus text-success"> Upload</span> button to upload a CSV list of investors. The selected Broker/Dealer and Status will be applied to all users. You can use the template at the top of the page as a sample CSV to get started.</p>
+                  <p>Uploaded files must be CSVs with rows in the following format:</p>
+                  <p><pre>Email,First Name,Last Name,Role</pre></p>
+                  <p>Example: <code>admin@factright.com,John,Smith,admin</code></p>
+                  <p>Available roles are: <em>superadmin, admin, brokeradmin, broker, advisor, user</em></p>
+                  <h3>Deleting a User</h3>
+                  <p>From either the User Info page or the Users table, click the <span class="fa fa-trash text-danger"> Delete</span> button to delete the selected user. The user is <strong>immediately and permanently</strong> deleted.</p>
+                  <h3>Manage a User</h3>
+                  <p>Click the <span class="fa fa-info text-info"> Info</span> button to enter the full User Info page, or <span class="fa fa-pencil text-warning"> Edit</span> to quickly edit the information of a user.</p>
+                  <p>The <span class="fa fa-info text-info"> Info</span> page allows you to reset passwords and view the login, subscription and download history of a given user.</p>
+                  {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                  <div class="bs-callout bs-callout-warning">
+                    <h4><strong>Admins:</strong> Adding/removing Subscriptions</h4>
+                    <p>From the Subscriptions tab, you can add and remove free access to selected subscriptions.</p>
+                    <p><strong>Paid subscriptions must be managed through Stripe,</strong> easily accessible by clicking the Stripe ID linked in the Profile tab. Cancelled subscriptions will synchronize on the user's next login.</p>
+                  </div>
+                  {% endif %}
+                </div>
+                <div id="admin-documents">
+                  <h2>Documents</h2>
+                  <p>All documents potentially available to users are displayed in the Documents table.</p>
+                  <p>Each document's report folder and group are displayed in the Folder column, formatted as <em>Folder (Group)</em>. The document's program is displayed in the Programs column. Documents belonging to programs outside of your broker/dealer's <a href="#admin-validprograms">valid programs</a> are displayed with a <span class="fa fa-ban"></span> icon.</p>
+                  <p>Filter by Folders or Programs by clicking their names within the table. Search any field using the Search field above the table.</p>
+                  <p>Admins are able to set document prices and advisors can purchase documents from subscription groups.</p>
+                  {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                  <h3>Uploading a Document</h3>
+                  <p>Click the <span class="fa fa-cloud-upload text-success"> Upload</span> button to upload a new document. Uploads are restricted to 16MB in size, but can be of any file type.</p>
+                  <p>Select the Report Folder and Program that the document belongs to. For your convenience, the file name field will auto-fill upon choosing a file. You can edit this file name as appropriate.</p>
+                  <div class="bs-callout bs-callout-info">
+                    <h4>New Document Notifications</h4>
+                    <p>Uploading a document will queue a notification for all users subscribed to the document's subscription group.</p>
+                    <p>By default, a user will receive a single email digest of all of their subscribed uploads every 24 hours, as applicable.</p>
+                    <p>Although not recommended, you can bypass the notification by uploading the document to the 'None' report folder, and reassigning it to a different folder later.</p>
+                  </div>
+                  <h3>Deleting a Document</h3>
+                  <p>From either the Document Info page or the Documents table, click the <span class="fa fa-trash text-danger"> Delete</span> button to delete the selected document. The document is <strong>immediately and permanently</strong> deleted.</p>
+                  <h3>Manage a Document</h3>
+                  <p>Click the <span class="fa fa-info text-info"> Info</span> button to enter the full Document Info page, or <span class="fa fa-pencil text-warning"> Edit</span> to quickly edit the information of a document.</p>
+                  <p>The <span class="fa fa-info text-info"> Info</span> page allows you quickly view the size, report folder, subscription group, program and upload/modification dates for the given document. The Downloads tab displays recent downloads in chronological order.</p>
+                  {% endif %}
+                  <h3>Download Report</h3>
+                  <p>Admins can view a graph of all downloads by month, as well as filterable tables of all downloads for the selected year.</p>
+                </div>
+                <div id="admin-validprograms">
+                  <h2>Valid Programs</h2>
+                  <p>Displays the programs your users can view. Contact an admin to adjust your broker/dealer's valid programs.</p>
+                  {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                  <div class="bs-callout bs-callout-warning">
+                    <h4><strong>Admins:</strong> Modify Other Broker/Dealers' Valid Programs</h4>
+                    <p>From the <a href="#data-companies">Broker/Dealers</a> page, click on the <span class="fa fa-pencil text-warning"> Edit</span> button to edit their valid programs.</p>
+                  </div>
+                  {% endif %}
+                </div>
+                {% endif %}
+                {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                <div id="data-overview">
+                  <h1 class="page-header">Data</h1>
+                  <p>Admins can edit the Broker/Dealers, Programs, Report Folders, Subscription Groups and Sponsors in the database.</p>
+                  <img src="{{url_for('static', filename='images/schema.png')}}" alt="Database Schema" class="img-responsive img-thumbnail bottom-buffer" />
+                  <p>Report Folders belong to a single Subscription Group. Users subscribe to Subscription Groups and can view all Documents from within their Broker/Dealer's Valid Programs. Programs are tracked beneath a single Sponsor.</p>
+                </div>
+                <div id="data-companies">
+                  <h2>Broker/Dealers</h2>
+                  <p>Users belong to a Broker/Dealer, managed by both their Home Office Admin and all Admins and Super Admins. Broker/Dealers can view documents within selected Valid Programs. Broker/Dealers can have free access to select Subscription Groups.</p>
+                  <p>You can view, add and delete Broker/Dealers from this page.</p>
+                  <h3>Adding a Broker/Dealer</h3>
+                  <p>Click the <span class="fa fa-plus text-success"> New</span> button to add a new broker/dealer. Select any Valid Programs that the Broker/Dealer should begin with.</p>
+                  <h3>Deleting a Broker/Dealer</h3>
+                  <p>From either the Broker/Dealer Info page or the Broker/Dealers table, click the <span class="fa fa-trash text-danger"> Delete</span> button to delete the selected broker/dealer. The broker/dealer is <strong>immediately and permanently</strong> deleted.</p>
+                  <h3>Manage a Broker/Dealer</h3>
+                  <p>Click the <span class="fa fa-info text-info"> Info</span> button to enter the full Broker/Dealer Info page, or <span class="fa fa-pencil text-warning"> Edit</span> to quickly edit the information of a broker/dealer.</p>
+                  <p>The <span class="fa fa-info text-info"> Info</span> page allows you quickly view users, valid programs, free access groups, creation/modification dates for the given broker/dealer. You can also assign valid Email Domains for the broker/dealer.</p>
+                  <div class="bs-callout bs-callout-warning">
+                    <h4>Manage Included Access Groups</h4>
+                    <p>Admins can grant users within a broker/dealer free access to a subscription group from the Included Access tab.</p>
+                    <p>After granting free access, users must subscribe to the subscription groups as if they were a standard free group. Removing free access from a broker/dealer <strong>does not</strong> delete subscriptions.</p>
+                  </div>
+                  <div class="bs-callout bs-callout-warning">
+                    <h4>Add Email Domains</h4>
+                    <p>The <a href="#request">Request Access</a> page can auto-fill the broker/dealer of recognized email addresses of new applicants.</p>
+                    <p>On a Broker/Dealer Edit page, click the <span class="fa fa-plus text-success"> New Email Domain</span> button to add a new email domain.</p>
+                    <p>Select the new domain on the Edit Broker/Dealer page. Broker/Dealers can have multiple Email Domains.</p>
+                  </div>
+                </div>
+                <div id="data-programs">
+                  <h2>Programs</h2>
+                  <p>Documents belong to Programs, which Broker/Dealers can flag as Valid Programs. Programs are sponsored by a single Sponsor.</p>
+                  <p>You can view, add and delete Programs from this page. You can filter by Sponsors by clicking a Sponsor within the table.</p>
+                  <h3>Adding a Program</h3>
+                  <p>Click the <span class="fa fa-plus text-success"> New</span> button to add a new program.</p>
+                  <h3>Deleting a Program</h3>
+                  <p>From either the Program Info page or the Programs table, click the <span class="fa fa-trash text-danger"> Delete</span> button to delete the selected program. The program is <strong>immediately and permanently</strong> deleted.</p>
+                  <h3>Manage a Program</h3>
+                  <p>Click the <span class="fa fa-info text-info"> Info</span> button to enter the full Program Info page, or <span class="fa fa-pencil text-warning"> Edit</span> to quickly edit the information of a program.</p>
+                  <p>The <span class="fa fa-info text-info"> Info</span> page allows you quickly view broker/dealer, documents and creation/modification dates for the given program.</p>
+                  <h3>Program Matrix</h3>
+                  <p>The Program Matrix visualizes which broker/dealer can view which programs. Broker/Dealers will appear with as <span class="fa fa-check text-success"> Valid</span> for each program they have marked as a Valid Program.</p>
+                </div>
+                <div id="data-folders">
+                  <h2>Report Folders</h2>
+                  <p>Report Folders are categories that a document can belong to; for example, Closed Opportunities or Open Opportunities. Documents belong to Report Folders, and Report Folders belong to Subscription Groups.
+                  <p>You can view, add and delete Report Folders from this page. You can filter by Groups by clicking a Group in the table.</p>
+                  <h3>Adding a Report Folder</h3>
+                  <p>Click the <span class="fa fa-plus text-success"> New</span> button to add a new report folder. Select the Subscription Group that the Folder will belong to.</p>
+                  <h3>Deleting a Report Folder</h3>
+                  <p>From either the Report Folder Info page or the Report Folders table, click the <span class="fa fa-trash text-danger"> Delete</span> button to delete the selected report folder. The report folder is <strong>immediately and permanently</strong> deleted.</p>
+                  <h3>Manage a Report Folder</h3>
+                  <p>Click the <span class="fa fa-info text-info"> Info</span> button to enter the full Report Folder Info page, or <span class="fa fa-pencil text-warning"> Edit</span> to quickly edit the information of a report folder.</p>
+                  <p>The <span class="fa fa-info text-info"> Info</span> page allows you quickly view creation/modification dates for the given report folder.</p>
+                </div>
+                <div id="data-groups">
+                  <h2>Subscription Groups</h2>
+                  <p>Subscription Groups contain one or multiple Report Folders. Users subscribe to Subscription Groups to view all documents within the Group's Folders.</p>
+                  <p>You can view, add and delete Subscription Groups from this page.</p>
+                  <div class="bs-callout bs-callout-danger">
+                    <h4>Paid Groups</h4>
+                    <p>Setting a price for a group will <strong>permanently lock in that price.</strong> You must create a new group if you wish to adjust pricing.</p>
+                    <p>This rule is enforced by Stripe to prevent the price of a subscription changing after a user has already subscribed.</p>
+                  </div>
+                  <h3>Adding a Subscription Group</h3>
+                  <p>Click the <span class="fa fa-plus text-success"> New</span> button to add a new subscription group. Add a price to create a Paid Group with a corresponding Stripe plan.</p>
+                  <h3>Deleting a Subscription Group</h3>
+                  <p>From either the Subscription Group Info page or the Subscription Groups table, click the <span class="fa fa-trash text-danger"> Delete</span> button to delete the selected subscription group. The subscription group is <strong>immediately and permanently</strong> deleted. The Stripe plan of a Paid Group will remain in Stripe's system.</p>
+                  <h3>Manage a Subscription Group</h3>
+                  <p>Click the <span class="fa fa-info text-info"> Info</span> button to enter the full Subscription Group Info page, or <span class="fa fa-pencil text-warning"> Edit</span> to quickly edit the information of a subscription group.</p>
+                  <p>The <span class="fa fa-info text-info"> Info</span> page allows you quickly view creation/modification dates for the given subscription group.</p>
+                  <p>You can add a price to a previously-free group from the <span class="fa fa-pencil text-warning"> Edit</span> page; be forewarned that <strong>the group will be permanently locked in at this price.</strong></p>
+                </div>
+                <div id="data-sponsors">
+                  <h2>Sponsors</h2>
+                  <p>Programs belong to a Sponsor for tracking and filtering purposes.</p>
+                  <p>You can view, add and delete Sponsors from this page.</p>
+                  <h3>Adding a Sponsor</h3>
+                  <p>Click the <span class="fa fa-plus text-success"> New</span> button to add a new sponsor.</p>
+                  <h3>Deleting a Sponsor</h3>
+                  <p>From either the Sponsor Info page or the Sponsors table, click the <span class="fa fa-trash text-danger"> Delete</span> button to delete the selected sponsor. The sponsor is <strong>immediately and permanently</strong> deleted.</p>
+                  <h3>Manage a Sponsor</h3>
+                  <p>Click the <span class="fa fa-info text-info"> Info</span> button to enter the full Sponsor Info page, or <span class="fa fa-pencil text-warning"> Edit</span> to quickly edit the information of a sponsor.</p>
+                  <p>The <span class="fa fa-info text-info"> Info</span> page allows you quickly view creation/modification dates for the given sponsor.</p>
+                </div>
+                {% endif %}
+                <div id="user-overview">
+                  <h1 class="page-header">User Panel</h1>
+                  <p>Users can manage their subscriptions, notifications and view documents from within their personal User Panel.</p>
+                </div>
+                <div id="user-dashboard">
+                  <h2>Dashboard</h2>
+                  <p>The User Dashboard shows newly uploaded documents and a shortcut to the Subscription page.</p>
+                  <p>The 5 most recent documents are displayed in a small table. The total of new documents since the last login is shown in the dashboard header.</p>
+                </div>
+                <div id="user-documents">
+                  <h2>Documents</h2>
+                  <p>Users can view and download documents from subscribed groups on this page.</p>
+                  <p>New documents since the last login are flagged with <strong>New</strong>.</p>
+                </div>
+                <div id="user-subscriptions">
+                  <h2>Subscriptions</h2>
+                  <p>Users can subscribe to subscription groups from this page.</p>
+                  <div class="bs-callout bs-callout-info">
+                    <h4>Notifications</h4>
+                    <p>Users receive an email digest of recently uploaded documents from within their subscriptions.</p>
+                    <p>You can disable notifications for a given group by clicking the notification status icon in your Subscriptions table.</p>
+                  </div>
+                  <h3>Included Groups</h3>
+                  <p>All users can subscribe to included groups simply by clicking 'Subscribe'. New users are subscribed to all included groups by default.</p>
+                  <h3>Paid Groups</h3>
+                  <p>Users can pay for groups by clicking 'Purchase' and following the Stripe checkout process. Users must enter a valid credit or debit card to purchase the group.</p>
+                  <p><strong>Subscriptions last for one year from the date of purchase.</strong> By default, the subscription will rebill automatically. Users can toggle auto-billing by clicking the Subscription status link.</p>
+                  <p>Subscription emails are managed by Stripe. Stripe sends billing notifications within a few weeks of the resubscription date.</p>
+                </div>
+                <div id="manage">
+                  <h1 class="page-header">Manage Account</h1>
+                  <p>Users and admins can change their personal information and email address on this page.</p>
+                  <div class="bs-callout bs-callout-danger">
+                    <h4>Email Address Changes</h4>
+                    <p><strong>Changing your email address will lock your account until you confirm the new address.</strong> Please make sure you use a valid email address.</p>
+                  </div>
+                  <h3>Email Alerts</h3>
+                  <p>Select how often you would like to receive subscription notifications. {{config.APP_NAME}} will create an email digest for all documents within the selected frequency.</p>
+                  <p>Selecting 'Immediately' will send email alerts during the report mail-out every day.</p>
+                  <h3>Time Zone</h3>
+                  <p>Select your preferred time zone. All timestamps on {{config.APP_NAME}} will reflect your choice in time zone.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% include '_footer.html' %}
+
+    {% assets "panel_js" %}
+      <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+    {% endassets %}
+    <script>
+    var offset = 70;
+
+    $('.sidebar li a').click(function(event) {
+      event.preventDefault();
+      $(".navbar-toggle").click();
+      $($(this).attr('href'))[0].scrollIntoView();
+      scrollBy(0, -offset);
+    });
+    </script>
+    {% include '_flash.html' %}
+    {% include '_analytics.html' %}
+  </body>
+</html>

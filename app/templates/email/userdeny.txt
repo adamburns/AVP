@@ -1,0 +1,9 @@
+{{ user.first_name }},
+
+You were denied access to {{ config.APP_NAME }}.
+
+{% if user.review_reason %}
+{{ user.review_reason }}
+{% endif %}
+
+Please contact us at {{ config.COMPANY_PHONE }} or {{ config.CONTACT_EMAIL }}, so that we can discuss this issue and get you started with {{ config.APP_NAME }}, should that be appropriate. Thank you!

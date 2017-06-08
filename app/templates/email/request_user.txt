@@ -1,0 +1,3 @@
+Thanks for your request, {{ user.first_name }}!
+
+Your request will be reviewed soon. Watch for an email regarding for approval status.

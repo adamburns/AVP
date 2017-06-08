@@ -1,0 +1,57 @@
+{% extends "_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}Request Access{% endblock %}
+{% block content %}
+<div class="faded-background animated fadeIn vertical-center">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-offset-3 col-sm-6 pop-box">
+                <form class="form-horizontal" id="request_form" role="form" method="post" enctype="multipart/form-data">
+                    <h2>Request Access</h2>
+                    <p class="text-muted">Enter your legal first/last name and company email address into the form below. We will notify the parties responsible for granting you access to {{config.APP_NAME}}.</p>
+                    <p class="text-muted">New users must wait for approval before they can log in. If you have been pre-approved, you will receive an email with instructions to log in.</p>
+                    {{ form.hidden_tag() }}
+                    {{ render_field(form.email, with_label=true) }}
+                    {{ render_field(form.first_name, with_label=true) }}
+                    {{ render_field(form.last_name, with_label=true) }}
+                    {{ render_field(form.phone, with_label=true) }}
+                    {{ render_field(form.advisor_number, with_label=true) }}
+                    <hr>
+                    {{ render_field(form.company, with_label=true, disabled=true) }}
+                    {{ render_field(form.broker_dealer, with_label=true) }}
+                    <hr>
+                    {{ render_field(form.recaptcha) }}
+                    {{ render_field(form.submit) }}
+                    <p>Already registered? <a href="/login">Log in</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    var $select = $('#company').selectize();
+    var selectizeControl = $select[0].selectize;
+    $('#email').blur(function() {
+        console.log($('input[name="email"]').val());
+        $.getJSON($SCRIPT_ROOT + '/_check_domain', {
+            email: $('input[name="email"]').val()
+        }, function(data) {
+            console.log(data.result);
+            if (data.result > 0) {
+                selectizeControl.setValue(data.result);
+                selectizeControl.disable();
+            } else {
+                selectizeControl.setValue('__None');
+                selectizeControl.enable();
+            }
+        });
+    });
+    $('#request_form').submit(function(){
+        $("#request_form :disabled").removeAttr('disabled');
+    });
+</script>
+{% endblock %}

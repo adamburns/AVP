@@ -1,0 +1,8 @@
+User-Agent: *
+Disallow: /login/
+Disallow: /register/
+Disallow: /reset/
+Disallow: /recover/
+Disallow: /confirm/
+Disallow: /static/
+Disallow: /templates/

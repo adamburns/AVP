@@ -1,0 +1,24 @@
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<script>
+{% for category, message in messages %}
+$.growl({
+    title: "<strong>{{ category.title() }}:</strong> ",
+    message: "{{ message }}",
+},{
+    type: "growl-{% if category == 'error' %}danger{% elif category == 'message' %}info{% else %}{{ category }}{% endif %}",
+    delay: 7500,
+    icon_type: 'class',
+    placement: {
+        from: "top",
+        align: "center"
+    },
+    animate: {
+        enter: 'animated fadeInDown',
+        exit: 'animated fadeOutUp'
+    },
+});
+{% endfor %}
+</script>
+{% endif %}
+{% endwith %}

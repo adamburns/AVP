@@ -1,0 +1,40 @@
+{% extends "admin/_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Deny User</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-9">
+                <form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+                    <div class="col-sm-offset-4 col-sm-8">
+                        <p>Choose a denial reason. An email will be sent to {{user.email}} to explain why they were denied, with an offer to fix the issues.</p>
+                    </div>
+                    {{ form.csrf_token }}
+                    {{ render_field(form.reason, with_label=true) }}
+                    {{ render_field(form.otherreason, with_label=true, disabled=true) }}
+                    {{ render_field(form.submit) }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+$('select#reason').append($("<option></option>")
+                  .attr("value", "other")
+                  .text("Other"));
+
+$('select#reason').on('change', function() {
+    if (this.value == 'other') {
+        $('textarea#otherreason').prop('disabled', false);
+    } else {
+        $('textarea#otherreason').prop('disabled', true);
+    }
+});
+</script>
+{% endblock %}

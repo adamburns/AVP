@@ -1,0 +1,23 @@
+{% extends "_base.html" %}
+{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% block content %}
+<div class="faded-background animated fadeIn vertical-center">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-offset-4 col-sm-4 pop-box">
+        <form action="{{ url_for_security('send_confirmation') }}" method="POST" name="send_confirmation_form" class="form-signin">
+          <h2 class="form-signin-heading">Email Confirmation</h2>
+          <p class="text-muted">Lost your email confirmation? We can send you a new confirmation.</p>
+          {{ send_confirmation_form.hidden_tag() }}
+          {{ render_field_with_errors(send_confirmation_form.email, class="form-control", placeholder="Email address", type="email", autofocus="autofocus", required="required") }}
+          {{ render_field(send_confirmation_form.submit, class="btn btn-lg btn-primary btn-block") }}
+          <a href="/login">&laquo; Back to login</a>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{% include '_render_errors.html' %}
+{% endblock %}

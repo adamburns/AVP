@@ -1,0 +1,96 @@
+{% macro render_field(field) -%}
+  {% set with_label = kwargs.pop('with_label', False) %}
+  {% set hidden = kwargs.pop('hidden', False) %}
+  {% set group_addon = kwargs.pop('group_addon', None) %}
+  {% set group_addon_icon = kwargs.pop('group_addon_icon', None) %}
+  {% set group_addon_icon_right = kwargs.pop('group_addon_icon_right', None) %}
+  {% set no_group = kwargs.pop('no_group', False) %}
+  {% set cols = kwargs.pop('cols', '8') %}
+  {% set offset = kwargs.pop('offset', '4') %}
+  {% set placeholder = '' %}
+  {% if not with_label %}
+    {% set placeholder = field.label.text %}
+  {% elif field.type == 'QuerySelectMultipleField' %}
+    {% set placeholder = 'Select some ' + field.label.text|lower + '...' %}
+  {% endif %}
+  {% if not no_group %}
+  <div class="form-group{% if field.errors %} has-error{% endif %}{% if hidden or field.id == 'csrf_token' %} hidden{% endif %}">
+  {% endif %}
+    {% if with_label and not field.id == 'submit' %}
+      <label for="{{ field.id }}" class="col-sm-4 control-label">
+        {{ field.label.text }}
+      </label>
+      <div class="controls col-sm-{{ cols }}">
+    {% else %}
+      <div class="controls col-sm-offset-{{ offset }} col-sm-{{ cols }}">
+    {% endif %}
+    {% if field.type == 'RadioField' %}
+      {% set class_ = 'radio '  + kwargs.pop('class_', '') %}
+    {% elif field.type == 'MultiCheckboxField' %}
+      {% set class_ = 'list-group checked-list-box ' + kwargs.pop('class_', '') %}
+    {% else %}
+      {% set class_ = 'form-control '  + kwargs.pop('class_', '') %}
+    {% endif %}
+    {% if field.flags.required %}
+      {% set class_ = class_ + 'required' %}
+    {% endif %}
+    {% if field.type == 'BooleanField' %}
+      <div class="checkbox">
+        <label>
+          {{ field(**kwargs) }}
+          {{ field.label.text|safe }}
+        </label>
+      </div>
+    {% else %}
+      {% if field.type in ('TextField', 'TextAreaField', 'PasswordField') %}
+        {% set class_ = class_ + ' input-xlarge' %}
+      {% elif field.type == 'FileField' %}
+        {% set class_ = class_ + ' input-file' %}
+      {% elif field.type == 'SubmitField' %}
+        {% set class_ = 'btn btn-primary btn-lg' %}
+      {% endif %}
+        {% if group_addon or group_addon_icon or group_addon_icon_right %}
+        <div class="input-group">
+        {% endif %}
+          {% if group_addon or group_addon_icon %}
+          <div class="input-group-addon">
+          {% if group_addon_icon %}
+            <i class="{{ group_addon_icon }}"></i>
+          {% else %}
+            {{ group_addon|safe }}
+          {% endif %}
+          </div>
+          {% endif %}
+          {{ field(class_=class_, placeholder=placeholder, required=field.flags.required, **kwargs) }}
+          {% if group_addon_icon_right %}
+          <div class="input-group-addon">
+            <i class="{{ group_addon_icon_right }}"></i>
+          </div>
+          {% endif %}
+        {% if group_addon or group_addon_icon or group_addon_icon_right %}
+        </div>
+        {% endif %}
+      {% if field.flags.required %}<span class='required_star'>*</span>{% endif %}
+    {% endif %}
+    {% if field.errors %}
+      <span for="{{ field.id }}" class="error help-block">{{ field.errors|join(', ') }}</span>
+    {% endif %}
+    {% if field.description %}
+      <p class="help-block">{{ field.description|safe }}</p>
+    {% endif %}
+    {% if not field.id == 'submit' %}
+      <div class="help-block with-errors no-buffer no-top-buffer"></div>
+    {% endif %}
+    </div>
+  {% if not no_group %}
+  </div>
+  {% endif %}
+{%- endmacro %}
+
+{% macro render_submit(field) -%}
+  <div class="form-group{% if field.errors %} error{% endif %}">
+    <div class="col-sm-offset-{{ offset }} col-sm-{{ cols }}">
+    {{ field(class="btn btn-primary", **kwargs)|safe }}
+    </div>
+  </div>
+{%- endmacro %}

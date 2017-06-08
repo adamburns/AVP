@@ -1,0 +1,14 @@
+{% extends "email/_base.html" %}
+{% block content %}
+<p>{{user.first_name}},</p>
+
+<p>There {%if documents|length > 1%}are new Advisor Due Diligence documents{% else %}is a new Advisor Due Diligence document{% endif %} available on {{config.APP_NAME}}:</p>
+
+<ul>
+{% for document in documents %}
+<li><strong>{{document.document_display_name}}</strong> ({{document.report_folder.report_folder_name}} for {{document.program.program_name}})</li>
+{% endfor %}
+</ul>
+
+<p><a href="{{url_for('user.documents_list', _external=True)}}" class='btn'>Log in and view documents</a></p>
+{% endblock %}

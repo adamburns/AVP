@@ -1,0 +1,24 @@
+{% macro render_field_with_errors(field, label_visible=false) %}
+  <p>
+    {% if field.type != 'HiddenField' and label_visible %}
+      {{ field.label }}
+    {% endif %}
+    {{ field(**kwargs)|safe }}
+  </p>
+  {% if field.errors %}
+    <ul>
+    {% for error in field.errors %}
+      <li>{{ error }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endmacro %}
+
+{% macro render_field(field, label_visible=false) %}
+  <p>
+    {% if field.type != 'HiddenField' and label_visible %}
+      {{ field.label }}
+    {% endif %}
+    {{ field(**kwargs)|safe }}
+  </p>
+{% endmacro %}

@@ -1,0 +1,10 @@
+A new user, {{ user.first_name }} {{ user.last_name }} ({{ user.email }}) has requested access to {{ config.APP_NAME }}{% if user.company %} on behalf of {{user.company.company_name}}{% else %} on behalf of {{user.broker_dealer}}{% endif %}.
+
+{% if user.broker_dealer %}
+Broker/Dealer: {{user.broker_dealer}}
+{% endif %}
+{% if user.crd_number %}
+Advisor Number: {{user.crd_number}}
+{% endif %}
+
+To respond to this request, please log in to the User Management panel at {{ url_for('admin.users_list', _external=True) }}.

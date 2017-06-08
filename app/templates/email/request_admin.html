@@ -1,0 +1,13 @@
+{% extends "security/email/_base.html" %}
+{% block content %}
+<p>A new user, {{ user.first_name }} {{ user.last_name }} ({{ user.email }}) has requested access to {{ config.APP_NAME }}{% if user.company %} on behalf of {{user.company.company_name}}{% else %} on behalf of {{user.broker_dealer}}{% endif %}.</p>
+
+{% if user.broker_dealer %}
+<p><strong>Broker/Dealer: </strong>{{user.broker_dealer}}
+{% endif %}
+{% if user.crd_number %}
+<p><strong>Advisor Number: </strong>{{user.crd_number}}
+{% endif %}
+
+<p>To respond to this request, please <a href="{{ url_for('admin.users_list', _external=True) }}">log in to the User Management panel</a></p>
+{% endblock %}

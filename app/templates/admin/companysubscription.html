@@ -1,0 +1,22 @@
+{% extends "admin/_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}Add Broker/Dealer Subscription{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Add Broker/Dealer Subscription</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-9">
+                <form class="form-horizontal" id="company-subscription-form" role="form" method="post" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    {{ render_field(form.company, with_label=true) }}
+                    {{ render_field(form.report_group, with_label=true) }}
+                    {{ render_field(form.submit) }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

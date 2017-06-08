@@ -1,0 +1,15 @@
+{% extends "_base.html" %}
+{% block title %}404 Page Not Found{% endblock %}
+{% block content %}
+<div class="faded-background animated fadeIn vertical-center text-center">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-offset-4 col-sm-4 pop-box">
+        <h1 style="font-size: 72px">404</h1>
+        <p>You have reached a page that does not exist, most likely by error. We apologize for the inconvenience.</p>
+        <p><script>document.write('<a class="btn btn-text" href="' + document.referrer + '"><i class="fa fa-fw fa-arrow-left"></i> Go Back</a>');</script> or <a class="btn btn-text" href="{{url_for('index')}}">Go Home <i class="fa fa-fw fa-home"></i></a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

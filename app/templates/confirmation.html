@@ -1,0 +1,15 @@
+{% extends "_base.html" %}
+{% block title %}{{title or 'Confirmation'}}{% endblock %}
+{% block content %}
+<div class="faded-background animated fadeIn vertical-center text-center">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-offset-4 col-sm-4 pop-box">
+        <h2 class="text-{{outcome}}">{{title or outcome.title()}}</h2>
+        <p>{{message|safe}}</p>
+        <p><script>document.write('<a class="btn btn-text" href="' + document.referrer + '"><i class="fa fa-fw fa-arrow-left"></i> Go Back</a>');</script> or <a class="btn btn-text" href="{{url_for('index')}}">Go Home <i class="fa fa-fw fa-home"></i></a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% if not dashboard %}
+{% extends "admin/_base.html" %}
+{% block title %}Download Report{% endblock %}
+{% endif %}
+{% block content %}
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>{% if dashboard %}Recent {% endif %}Download Report</h2>
+        </div>
+        <div class="col-md-6">
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation" class="active"><a href="#overview" aria-controls="overview" role="tab" data-toggle="tab">Overview</a></li>
+                <li role="presentation"><a href="#top" aria-controls="top" role="tab" data-toggle="tab">Top Downloaded</a></li>
+                <li role="presentation"><a href="#recent" aria-controls="recent" role="tab" data-toggle="tab">Recent Downloads</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid" role="tabpanel">
+        <form class="form-inline" style="margin-bottom: 10px">
+            <div class="form-group">
+                <label class="control-label">Year</label>
+                <select class="no-selectize form-control" style="max-width: 200px" name="year" id="year" onchange="this.form.submit()">
+                    <option value=0>All</option>
+                    {% for year in data.years %}<option value='{{year|int}}'{% if year == data.year_selected %} selected='selected'{% endif %}>{{year|int}}</option>{% endfor %}
+                </select>
+            </div>
+        </form>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="overview">
+                <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+                <div class="row">
+                    <div class="col-md-10">
+                        <canvas id="download-line" height="150"></canvas>
+                    </div>
+                    <div class="col-md-2">
+                        <div id="download-line-legend"></div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="top">
+                <div class="table-responsive" id="documents-wrapper" style="opacity: 0">
+                    <table class="table table-striped table-responsive table-hover nowrap" id="documents-table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="expand-link"></th>
+                                <th class="all">Document</th>
+                                <th class="min-phone-p">Folder</th>
+                                <th class="min-phone-p">Program</th>
+                                <th class="min-tablet text-right">Uploaded</th>
+                                <th class="all text-right sort-by">Downloads</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for document in data.documents %}
+                            <tr>
+                                <td></td>
+                                <td class="info-link" data-href="{{url_for('admin.document_info', document_id=document.document_id)}}">
+                                    {% if 'audio' in document.document_type %}
+                                    <span class="fa fa-fw file-audio fa-file-audio-o" aria-hidden="true"></span>
+                                    {% elif 'image' in document.document_type %}
+                                    <span class="fa fa-fw file-image fa-file-image-o" aria-hidden="true"></span>
+                                    {% elif 'pdf' in document.document_type %}
+                                    <span class="fa fa-fw file-pdf fa-file-pdf-o" aria-hidden="true"></span>
+                                    {% elif 'text' in document.document_type %}
+                                    <span class="fa fa-fw file-text fa-file-text-o" aria-hidden="true"></span>
+                                    {% elif 'video' in document.document_type %}
+                                    <span class="fa fa-fw file-movie fa-file-movie-o" aria-hidden="true"></span>
+                                    {% else %}
+                                    <span class="fa fa-fw file-other fa-file-code-o" aria-hidden="true"></span>
+                                    {% endif %}
+                                    {{document.document_display_name}}
+                                </td>
+                                {% if document.report_folder %}
+                                <td class='search-link' data-search='{{document.report_folder.report_folder_name}}'>
+                                    {{document.report_folder.report_folder_name}}{% if document.report_folder.report_group %} ({{document.report_folder.report_group.report_group_name}}){% endif %}
+                                </td>
+                                {% else %}
+                                <td class='text-muted'>None</td>
+                                {% endif %}
+                                {% if document.program %}
+                                <td class='search-link' data-search='{{document.program.program_name}}'>
+                                    {% if not document.is_valid() %}
+                                    <span class="fa fa-ban" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Program not authorized"></span>
+                                    {% endif %}
+                                    {{document.program.program_name}}
+                                </td>
+                                {% else %}
+                                <td class='text-muted'><span class="fa fa-ban" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Program not available"></span> None</td>
+                                {% endif %}
+                                <td class="text-right" data-order="{{document.time_created|datetime(format='sort')}}">
+                                    <span data-toggle="tooltip" data-placement="top" title="{{document.time_created|datetime(format='full')}}">{{document.time_created|datetime}}</span>
+                                </td>
+                                <td class="text-right">
+                                    {{document.year_downloads}}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="recent">
+                <div class="table-responsive" id="downloads-wrapper" style="opacity: 0">
+                    <table class="table table-striped table-responsive table-hover nowrap" id="downloads-table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="expand-link"></th>
+                                <th class="all">User</th>
+                                <th class="all">Document</th>
+                                <th class="min-phone-p">Folder</th>
+                                <th class="min-phone-p">Program</th>
+                                <th class="min-tablet text-right sort-by">Downloaded</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for download in data.downloads %}
+                            <tr>
+                                <td></td>
+                                <td{% if download.user %} class="info-link" data-href="{{url_for('admin.user_info', user_id=download.user.id)}}"{% endif %}>
+                                    {{download.user.email}} ({{download.user.first_name}} {{download.user.last_name}})
+                                </td>
+                                <td class="info-link" data-href="{{url_for('admin.document_info', document_id=download.document_id)}}">
+                                    {% if 'audio' in download.document.document_type %}
+                                    <span class="fa fa-fw file-audio fa-file-audio-o" aria-hidden="true"></span>
+                                    {% elif 'image' in download.document.document_type %}
+                                    <span class="fa fa-fw file-image fa-file-image-o" aria-hidden="true"></span>
+                                    {% elif 'pdf' in download.document.document_type %}
+                                    <span class="fa fa-fw file-pdf fa-file-pdf-o" aria-hidden="true"></span>
+                                    {% elif 'text' in download.document.document_type %}
+                                    <span class="fa fa-fw file-text fa-file-text-o" aria-hidden="true"></span>
+                                    {% elif 'video' in download.document.document_type %}
+                                    <span class="fa fa-fw file-movie fa-file-movie-o" aria-hidden="true"></span>
+                                    {% else %}
+                                    <span class="fa fa-fw file-other fa-file-code-o" aria-hidden="true"></span>
+                                    {% endif %}
+                                    {{download.document.document_display_name}}
+                                </td>
+                                {% if download.document.report_folder %}
+                                <td class='search-link' data-search='{{download.document.report_folder.report_folder_name}}'>
+                                    {{download.document.report_folder.report_folder_name}}{% if download.document.report_folder.report_group %} ({{download.document.report_folder.report_group.report_group_name}}){% endif %}
+                                </td>
+                                {% else %}
+                                <td class='text-muted'>None</td>
+                                {% endif %}
+                                {% if download.document.program %}
+                                <td class='search-link' data-search='{{download.document.program.program_name}}'>
+                                    {% if not download.document.is_valid() %}
+                                    <span class="fa fa-ban" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Program not authorized"></span>
+                                    {% endif %}
+                                    {{download.document.program.program_name}}
+                                </td>
+                                {% else %}
+                                <td class='text-muted'>
+                                    <span class="fa fa-ban" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Program not available"></span> None
+                                </td>
+                                {% endif %}
+                                <td class="text-right" data-order="{{download.downloaded_at|datetime(format='sort')}}">
+                                    {{download.downloaded_at|datetime(format='pretty')}}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+var ctx = $("#download-line").get(0).getContext("2d");
+var lineData = {
+    labels: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    datasets: [
+        {% for folder in data.folders %}
+        {
+            label: "{{folder.report_folder_name}}",
+            fillColor: "rgba({{(folder.color.red * 255)|int}},{{(folder.color.blue * 255)|int}},{{(folder.color.green * 255)|int}},0.2)",
+            strokeColor: "rgba({{(folder.color.red * 255)|int}},{{(folder.color.blue * 255)|int}},{{(folder.color.green * 255)|int}},1)",
+            pointColor: "rgba({{(folder.color.red * 255)|int}},{{(folder.color.blue * 255)|int}},{{(folder.color.green * 255)|int}},1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba({{(folder.color.red * 255)|int}},{{(folder.color.blue * 255)|int}},{{(folder.color.green * 255)|int}},1)",
+            data: [
+                {{data.totals[folder.report_folder_id,"January"] or 0}},
+                {{data.totals[folder.report_folder_id,"February"] or 0}},
+                {{data.totals[folder.report_folder_id,"March"] or 0}},
+                {{data.totals[folder.report_folder_id,"April"] or 0}},
+                {{data.totals[folder.report_folder_id,"May"] or 0}},
+                {{data.totals[folder.report_folder_id,"June"] or 0}},
+                {{data.totals[folder.report_folder_id,"July"] or 0}},
+                {{data.totals[folder.report_folder_id,"August"] or 0}},
+                {{data.totals[folder.report_folder_id,"September"] or 0}},
+                {{data.totals[folder.report_folder_id,"October"] or 0}},
+                {{data.totals[folder.report_folder_id,"November"] or 0}},
+                {{data.totals[folder.report_folder_id,"December"] or 0}}
+            ]
+        },
+        {% endfor %}
+    ]
+}
+{% raw %}
+var lineOptions = {
+    responsive: true,
+    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend report-legend list-unstyled\"><% for (var i=0; i<datasets.length; i++){%><li><span class=\"fa fa-fw fa-square\" style=\"color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+}
+{% endraw %}
+var downloadLine = new Chart(ctx).Line(lineData, lineOptions);
+$("#download-line-legend").html(downloadLine.generateLegend());
+</script>
+{% endblock %}

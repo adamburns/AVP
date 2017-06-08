@@ -1,0 +1,46 @@
+{% extends "admin/_base.html" %}
+{% block title %}Broker/Dealers{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Broker/Dealers</h2>
+</div>
+<div class="page-content">
+    <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+    <div class="table-responsive" id="broker_dealers-wrapper" style="opacity: 0">
+        <table class="table table-striped table-responsive table-hover nowrap" id="broker_dealers-table" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="all expand-link"></th>
+                    <th class='all'>Name</th>
+                    <th class='min-phone-l text-right sort-by'>Created</th>
+                    <th class='min-phone-p text-right'>Users</th>
+                    <th class='min-phone-p text-right'>Programs</th>
+                    <th class='all text-right no-sort'></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for company in companies %}
+                <tr>
+                    <td></td>
+                    <td class="info-link" data-href="{{url_for('admin.company_info', company_id=company.company_id)}}">{{company.company_name}}</td>
+                    <td class='text-right' data-order="{{company.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{company.time_created|datetime(format='full')}}">{{company.time_created|datetime}}</span></td>
+                    <td class='text-right'>{{company.users|length}}</td>
+                    <td class='text-right'>{{company.valid_programs|length}}</td>
+                    <td class='text-right'>
+                        <a href='{{url_for("admin.edit_company", company_id=company.company_id)}}' class='action-button btn btn-warning btn-xs admin'><span class="fa fa-pencil fa-lg fa-fw" aria-hidden="true"></span></a>
+                        {% if not company.protected %}
+                        <a href='#' data-href='{{url_for("admin.del_company", company_id=company.company_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                        {% else %}
+                        <a href='#' class='action-button btn btn-danger btn-xs disabled admin'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>{% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="well well-sm">
+    <a href="{{url_for('admin.new_company')}}" class="btn btn-success admin"><span class="fa fa-plus" aria-hidden="true"></span> New Broker/Dealer</a>
+    <a href="{{url_for('admin.new_domain')}}" class="btn btn-success"><span class="fa fa-plus" aria-hidden="true"></span> New Email Domain</a>
+</div>
+{% endblock %}

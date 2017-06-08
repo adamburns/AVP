@@ -1,0 +1,7 @@
+{% extends "security/email/_base.html" %}
+{% block content %}
+<p>Your password for {{ config.APP_NAME }} has been changed.</p>
+{% if security.recoverable %}
+<p>If you did not change your password, <a href="{{ url_for_security('forgot_password', _external=True) }}">click here to reset it</a>.</p>
+{% endif %}
+{% endblock %}

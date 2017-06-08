@@ -1,0 +1,5 @@
+{{ user.first_name }},
+
+Your broker/dealer, {{ user.company.company_name }}, has granted you access to their subscription for the {{ subscription.report_group.report_group_name }} report group. You now have full access to all reports within this group.
+
+To view reports, please log in to {{ config.APP_NAME }} at {{ url_for('user.documents_list', _external=True) }}

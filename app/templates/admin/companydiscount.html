@@ -1,0 +1,95 @@
+{% extends "admin/_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}Add Broker/Dealer Discount{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Add Broker/Dealer Discount</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-9">
+                <form class="form-horizontal" id="company-discount-form" role="form" method="post" enctype="multipart/form-data">
+                    {{ form.csrf_token }}
+                    {{ render_field(form.company, with_label=true) }}
+                    {{ render_field(form.report_group, with_label=true) }}
+                    <hr>
+                    <div id="subscription_info" class="col-sm-offset-4 col-sm-8 hidden"></div>
+                    {{ render_field(form.discount, with_label=true, group_addon_icon_right='fa fa-fw fa-percent', disabled=true) }}
+                    {{ render_field(form.free, disabled=true) }}
+                    <div id="total_info" class="col-sm-offset-4 col-sm-8 hidden"></div>
+                    {{ render_field(form.submit, disabled=true) }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script type="text/javascript">
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+var price = 0;
+var discount = 0;
+$('#report_group, #company').change(function() {
+    $('input[name="discount"]').val('');
+    $("#total_info").addClass('hidden');
+    $('#free').prop('checked', false);
+    if ($('select[name="company"]').val() > 0 && $('select[name="report_group"]').val() > 0) {
+        $.getJSON($SCRIPT_ROOT + "{{url_for('admin.check_company_subscription')}}", {
+            company: $('select[name="company"]').val(),
+            report_group: $('select[name="report_group"]').val()
+        }, function(data) {
+            $("#subscription_info").removeClass('hidden');
+            if (data.result['price'] == 0) {
+                $("#subscription_info").html('<div class="alert alert-warning"><strong>This group is free.</strong> You cannot set a discounted price.</div>');
+                $("#discount, #free, #submit").attr('disabled', 'disabled');
+            } else if (data.result['subscription'] == true) {
+                $("#subscription_info").html('<div class="alert alert-danger"><strong>This group has active subscriptions.</strong><br/>You must delete their Subscription to set a price.</div>');
+                $("#discount, #free, #submit").attr('disabled', 'disabled');
+            } else if (data.result['discount'] == true) {
+                $("#subscription_info").html('<div class="alert alert-danger"><strong>This group already has a discounted price of $' + parseFloat(data.result['price'], 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + '.</strong><br/>You must delete this discount to set a new discount.</div>');
+                $("#discount, #free, #submit").attr('disabled', 'disabled');
+            } else {
+                price = data.result['price'];
+                $("#subscription_info").html('<p>Normal price: <strong id="subscription_price">$' + parseFloat(data.result['price'], 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + '</strong></p>');
+                $("#discount, #free").removeAttr('disabled');
+            }
+        });
+    }
+});
+$('#discount').keyup(function() {
+    if ($(this).val() == 100 && this.value) {
+        $('#free').prop('checked', true);
+    } else {
+        $('#free').prop('checked', false);
+        $("#submit").attr('disabled', 'disabled');
+        $("#total_info").addClass('hidden');
+    }
+    updateTotal();
+});
+$('#free').change(function() {
+    if ($(this).is(':checked')) {
+        $('input[name="discount"]').val('100');
+        $("#discount").attr('readonly', 'readonly');
+        updateTotal();
+    } else {
+        $('input[name="discount"]').val('');
+        $("#discount").removeAttr('readonly');
+        updateTotal();
+    }
+});
+function updateTotal() {
+    if ($('select[name="company"]').val() > 0 && $('select[name="report_group"]').val() > 0 && ($('input[name="discount"]').val() > 0 || $('#free').prop('checked') == true)) {
+        $("#total_info").removeClass('hidden');
+        discount = price - (price * ($('input[name="discount"]').val() * .01));
+        if ($('input[name="discount"]').val() >= 0 && $('input[name="discount"]').val() <= 100) {
+            $("#total_info").html('<p>Final price: <s>$' + parseFloat(price, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + '</s> <strong id="final_price">$' + parseFloat(discount, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, "$1,").toString() + '</strong></p>');
+            $("#submit").removeAttr('disabled');
+        } else {
+            $("#total_info").html('<div class="alert alert-danger"><strong>Discount percentage must be between 1 and 99%.</strong></div>');
+            $("#submit").attr('disabled', 'disabled');
+        }
+    }
+}
+</script>
+{% endblock %}

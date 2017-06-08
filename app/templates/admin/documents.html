@@ -1,0 +1,149 @@
+{% if not dashboard %}
+{% extends "admin/_base.html" %}
+{% block title %}Documents{% endblock %}
+{% endif %}
+{% block content %}
+<div class="page-header">
+    <h2>{% if dashboard %}Recent {% endif %}Documents</h2>
+</div>
+<div class="page-content">
+    <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+    <div class="table-responsive" id="documents-wrapper" style="opacity: 0">
+        <table class="table table-striped table-responsive table-hover nowrap" id="documents-table" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="all expand-link"></th>
+                    <th class="all">Name</th>
+                    <th class="none">Filename</th>
+                    <th class="min-phone-l">Folder</th>
+                    <th class="min-phone-l">Program</th>
+                    <th class="min-tablet-l">Visible</th>
+                    <th class="min-phone-p text-right">Price</th>
+                    <th class="min-tablet-l text-right sort-by">Uploaded</th>
+                    <th class="all text-right no-sort"></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for document in data.documents %}
+            {% if document.document_id != 104 or current_user.company.company_name == 'Terra Capital Partners' or current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                <tr {% if document.time_deleted %}class='danger'{% endif %}>
+                    <td></td>
+                    <td class="info-link" data-href="{{url_for('admin.document_info', document_id=document.document_id)}}">
+                        {% if 'audio' in document.document_type %}
+                        <span class="fa fa-fw file-audio fa-file-audio-o" aria-hidden="true"></span>
+                        {% elif 'image' in document.document_type %}
+                        <span class="fa fa-fw file-image fa-file-image-o" aria-hidden="true"></span>
+                        {% elif 'pdf' in document.document_type %}
+                        <span class="fa fa-fw file-pdf fa-file-pdf-o" aria-hidden="true"></span>
+                        {% elif 'text' in document.document_type %}
+                        <span class="fa fa-fw file-text fa-file-text-o" aria-hidden="true"></span>
+                        {% elif 'video' in document.document_type %}
+                        <span class="fa fa-fw file-movie fa-file-movie-o" aria-hidden="true"></span>
+                        {% else %}
+                        <span class="fa fa-fw file-other fa-file-code-o" aria-hidden="true"></span>
+                        {% endif %}
+                        {{document.document_display_name}}
+                    </td>
+                    <td>
+                        {{document.document_name}}
+                    </td>
+                    {% if document.public %}
+                    <td class='search-link' data-search='Public'>
+                        <em>Public</em>
+                    </td>
+                    {% elif document.report_folder %}
+                    <td class='search-link' data-search='{{document.report_folder.report_folder_name}}'>
+                        {{document.report_folder.report_folder_name}}{% if document.report_folder.report_group %} ({{document.report_folder.report_group.report_group_name}}){% endif %}
+                    </td>
+                    {% else %}
+                    <td class='text-muted'>None</td>
+                    {% endif %}
+                    {% if document.public %}
+                    <td class='search-link' data-search='Public'>
+                        <em>Public</em>
+                    </td>
+                    {% elif document.program %}
+                    <td class='search-link' data-search='{{document.program.program_name}}'>
+                        {% if not document.is_valid() %}
+                        <span class="fa fa-ban" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Program not authorized"></span>
+                        {% endif %}
+                        {{document.program.program_name}}
+                    </td>
+                    {% else %}
+                    <td class='text-muted'><span class="fa fa-ban" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Program not available"></span> None</td>
+                    {% endif %}
+                    {% if document.is_valid() %}
+                    <td class="text-center bg-success text-success">Yes</td>
+                    {% else %}
+                    <td class="text-center bg-danger text-danger">No</td>
+                    {% endif %}
+                    <td class="text-right">
+                        {% if document.price > 0 %}
+                        {{document.price|currency}}
+                        {% else %}
+                        <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-right" data-order="{{document.time_created|datetime(format='sort')}}">
+                        <span data-toggle="tooltip" data-placement="top" title="{{document.time_created|datetime(format='full')}}">{{document.time_created|datetime}}</span>
+                    </td>
+                    <td class="text-right">
+                        {% if document.document_id == 104 %}
+                        <a href="#" data-href="/view/{{document.document_id}}" class='action-button btn btn-primary btn-xs' data-toggle="modal" data-target="#usage-agreement">
+                            <span class="fa fa-eye fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        <a href="#" data-href="/download/{{document.document_id}}" class='action-button btn btn-primary btn-xs' data-toggle="modal" data-target="#usage-agreement">
+                            <span class="fa fa-download fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        {% else %}
+                        <a href='/view/{{document.document_id}}' class='action-button btn btn-primary btn-xs'>
+                            <span class="fa fa-eye fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        <a href='/download/{{document.document_id}}' class='action-button btn btn-primary btn-xs'>
+                            <span class="fa fa-download fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        {% endif %}
+                        <a href='{{url_for("admin.edit_document", document_id=document.document_id)}}' class='action-button btn btn-warning btn-xs admin'>
+                            <span class="fa fa-pencil fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                        <a data-href='{{url_for("admin.del_document", document_id=document.document_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'>
+                            <span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span>
+                        </a>
+                    </td>
+                </tr>
+            {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="well well-sm">
+    <a href="{{url_for('admin.upload_document')}}" class="btn btn-success admin"><span class="fa fa-cloud-upload" aria-hidden="true"></span> Upload</a>
+    {% if dashboard %}
+    <a href="{{url_for('admin.documents_list')}}" class="btn btn-info"><span class="fa fa-file" aria-hidden="true"></span> Manage</a>
+    {% endif %}
+</div>
+<div class="modal fade" id="usage-agreement" tabindex="-1" role="dialog" aria-labelledby="UsageAgreement" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Usage Agreement</h2>
+            </div>
+            <div class="modal-body">
+                <p>You are receiving this report pursuant to your request and are deemed to be FactRight’s client for this limited purpose. Through an engagement letter with FactRight, the sponsor or issuer has acknowledged that it is not a client of FactRight and that for logistical purposes only the sponsor is remitting the fee for the report on behalf of FactRight’s clients. By receiving this report, you acknowledge and agree that the report contains confidential information and that you will not disseminate this report or any of its contents to any third parties. You further agree that you will not use the report or the information contained within the report for any purpose other than to assist in the evaluation of the offering and sponsor that is the subject of this report. You also acknowledge that FactRight may perform similar due diligence reporting functions for other broker dealers, registered investment advisors, lenders, and investment professionals. You also agree to waive any conflict, real or perceived, that this may potentially create. If you do not agree, please stop this transaction and contact FactRight at 847-805-6150, located at 10125 Crosstown Circle, Ste. 300, Eden Prairie, MN 55344. If you continue the transaction, you agree to all of the terms and conditions. If you have any questions regarding the content of this report, please contact FactRight. Further information on the sponsor and product may be available through other independent sources or in a separate FactRight sponsor or offering report. If you would like FactRight to obtain additional information or provide a more in-depth review than what has been provided in this report or on its website, please contact the FactRight office to discuss terms and parameters.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-success btn-ok">Agree</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+$('#usage-agreement').on('show.bs.modal', function(e) {
+    $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
+});
+</script>
+{% endblock %}

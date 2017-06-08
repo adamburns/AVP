@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta name="viewport" content="width=device-width" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  {% assets "email_css" %}
+  <style type="text/css">
+    {% include "email/gen/email.css" %}
+  </style>
+  {% endassets %}
+</head>
+<body>
+  <table class="body-wrap">
+    <tr>
+      <td class="container">
+        <div class="content">
+          <span class="logo-fact">Fact</span><span class="logo-right">Right</span>
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td class="container">
+        <div class="content">
+          {% block content %}
+          {% endblock %}
+        </div>
+      </td>
+    </tr>
+  </table>
+  <table class="footer-wrap">
+    <tr>
+      <td class="container">
+        <div class="content">
+          <p><strong>{{config.COMPANY_NAME}}</strong></p>
+          <p>{{config.COMPANY_ADDRESS}}</p>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

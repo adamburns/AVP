@@ -1,0 +1,40 @@
+{% extends "user/_base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="jumbotron">
+        {% if data.new_documents|length == 1 %}
+        <p>There has been <strong>{{data.new_documents|length}}</strong> new report uploaded since your last visit.</p>
+        {% elif data.new_documents|length > 1 %}
+        <p>There have been <strong>{{data.new_documents|length}}</strong> new reports uploaded since your last visit.</p>
+        {% endif %}
+        {% if data.subscriptions|length == 0 %}
+        <p>You are not subscribed to any report groups.</p>
+        {% elif data.subscriptions|length == 1 %}
+        <p>You are currently subscribed to <strong>{{data.subscriptions|length}}</strong> report group.</p>
+        {% else %}
+        <p>You are currently subscribed to <strong>{{data.subscriptions|length}}</strong> report groups.</p>
+        {% endif %}
+        <p class='text-right no-margin'><a href="{{url_for('user.subscriptions_list')}}" class="btn btn-primary btn-large"><span class="fa fa-fw fa-check-square-o" aria-hidden="true"></span> Manage Subscriptions</a></p>
+      </div>
+    </div>
+  </div>
+  <div class="row bottom-buffer">
+    <div class="col-md-12">
+      {% include 'user/publicdocuments.html' %}
+    </div>
+  </div>
+  <div class="row bottom-buffer">
+    <div class="col-md-12">
+      {% include 'user/documents.html' %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      {% include 'user/library.html' %}
+    </div>
+  </div>
+</div>
+{% endblock %}

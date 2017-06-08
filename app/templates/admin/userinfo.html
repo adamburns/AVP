@@ -1,0 +1,283 @@
+{% extends "admin/_base.html" %}
+{% block title %}{{data.user.first_name}} {{data.user.last_name}}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-3">
+            <h2>User Info</h2>
+        </div>
+        <div class="col-md-9">
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation" class="active"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a></li>
+                <li role="presentation"><a href="#subscriptions" aria-controls="subscriptions" role="tab" data-toggle="tab">Subscriptions <span class="badge">{{data.user.subscriptions|count}}</span></a></li>
+                <li role="presentation"><a href="#seats" aria-controls="seats" role="tab" data-toggle="tab">Seats <span class="badge">{{data.user.subscription_seats|count}}</span></a></li>
+                <li role="presentation"><a href="#downloads" aria-controls="downloads" role="tab" data-toggle="tab">Downloads <span class="badge">{{data.user.downloads|count}}</span></a></li>
+                {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                <li role="presentation"><a href="#purchases" aria-controls="purchases" role="tab" data-toggle="tab">Purchases <span class="badge">{{data.user.purchases|count}}</span></a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="info-well">
+    <span class="fa-stack fa-2x pull-left role-icon">
+        <i class="fa fa-square fa-stack-2x {% if data.user.time_deleted or data.user.review_status == 'DENIED' %}text-danger{% else %}role-{{data.user.roles[0].name}}{% endif %}"></i>
+        <i class="fa fa-user{% if not data.user.active %}-times{% endif %} fa-inverse fa-stack-1x"></i>
+    </span>
+    <h3 class="info-header">{{data.user.first_name}} {{data.user.last_name}}<br/>
+    <small>{% if data.user.review_status == 'PENDING' %}Pending {% elif data.user.review_status == 'DENIED' %}Denied {% elif data.user.time_deleted %}Deleted {% elif not data.user.active %}Inactive {% endif %}{{data.user.roles[0].description}}{% if data.user.company and (current_user.has_role('superadmin') or current_user.has_role('admin')) %} - <a href="{{url_for('admin.company_info', company_id=data.user.company.company_id)}}">{{data.user.company.company_name}}</a>{% endif %}</small></h3>
+</div>
+<div class="page-content tab-content">
+    <div role="tabpanel" class="tab-pane active" id="profile">
+        <table class="table table-striped table-responsive nowrap" cellspacing="0" width="100%">
+            <tr>
+                <th>Email</th>
+                <td><a href="mailto:{{data.user.email}}">{{data.user.email}}</a></td>
+            </tr>
+            {% if data.user.phone %}
+            <tr>
+                <th>Phone</th>
+                <td>{{data.user.phone}}</td>
+            </tr>
+            {% endif %}
+            {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+            <tr>
+                <th>Stripe ID</th>
+                <td>{% if data.user.stripe_id %}<a href="https://dashboard.stripe.com/{% if config.STRIPE_TEST %}test/{% endif %}customers/{{data.user.stripe_id}}" target="_blank">{{data.user.stripe_id}} <span class="fa fa-external-link" aria-hidden="true"></span></a>{% else %}None (no paid subscription history){% endif %}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Time Zone</th>
+                <td>{{data.user.time_zone}}</td>
+            </tr>
+            {% if data.user.login_count > 0 %}
+            <tr>
+                <th>Login count</th>
+                <td>{{data.user.login_count}}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Last login time</th>
+                <td>{% if data.user.current_login_at %}{{data.user.current_login_at|datetime(format='pretty')}} from IP {{data.user.current_login_ip}}{% else %}<span class="text-muted">Never</span>{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Created</th>
+                <td>{{data.user.time_created|datetime(format='pretty')}} by {{data.user.who_created or 'Admin'}}</td>
+            </tr>
+            {% if data.user.review_status %}
+            <tr>
+                <th>Review Status</th>
+                <td>
+                    {% if data.user.review_status == 'APPROVED' %}
+                    <div class="badge badge-success">Approved</div>
+                    {% elif data.user.review_status == 'PENDING' %}
+                    <div class="badge badge-warning">Pending</div>
+                    {% elif data.user.review_status == 'DENIED' %}
+                    <div class="badge badge-danger">Denied</div>
+                    {% endif %}
+                    {% if data.user.review_reason %} - {{data.user.review_reason}}{% endif %}
+                </td>
+            </tr>
+            {% endif %}
+            {% if data.user.time_reviewed %}
+            <tr>
+                <th>Reviewed By</th>
+                <td>{{data.user.time_reviewed|datetime(format='pretty')}} by {{data.user.who_reviewed or 'Admin'}}</td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Email Confirmed</th>
+                <td>{{data.user.confirmed_at|datetime(format='pretty') or 'No'}}</td>
+            </tr>
+            {% if data.user.time_modified %}
+            <tr>
+                <th>Last modified</th>
+                <td>{{data.user.time_modified|datetime(format='pretty')}} by {{data.user.who_modified}}</td>
+            </tr>
+            {% endif %}
+            {% if data.user.time_deleted %}
+            <tr>
+                <th>Deleted</th>
+                <td>{{data.user.time_deleted|datetime(format='pretty')}} by {{data.user.who_deleted}}</td>
+            </tr>
+            {% endif %}
+        </table>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="subscriptions">
+        <div class="table-responsive">
+            <table class="table table-striped table-responsive table-hover nowrap" id="subscriptions-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class="all">Report Group</th>
+                        {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                        <th class="min-phone-l">Stripe ID</th>
+                        {% endif %}
+                        <th class='text-right'>Notifications</th>
+                        <th class='all text-right sort-by'>Created On</th>
+                        <th class="none text-right">Created By</th>
+                        <th class='text-right no-sort'></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for subscription in data.user.subscriptions %}
+                    <tr>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.group_info', report_group_id=subscription.report_group.report_group_id)}}#subscriptions">{{subscription.report_group.report_group_name}}</td>
+                        {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+                        <td>{{subscription.stripe_id or 'None (included access)'}}</td>
+                        {% endif %}
+                        <td class='text-right'>{% if subscription.is_notification_enabled() %}<span class="fa fa-check" aria-hidden="true"></span>{% endif %}</td>
+                        <td class="text-right" data-order="{{subscription.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.time_created|datetime(format='full')}}">{{subscription.time_created|datetime}}</span></td>
+                        <td class="text-right">{{subscription.who_created}}</td>
+                        <td class='text-right'>
+                            <a href='#' data-href='{{url_for("admin.delete_subscription", subscription_id=subscription.report_subscription_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="seats">
+        <div class="table-responsive">
+            <table class="table table-striped table-responsive table-hover nowrap" id="seats-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class="all">Report Group</th>
+                        <th class='all text-right sort-by'>Added On</th>
+                        <th class="none text-right">Added By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for seat in data.user.subscription_seats %}
+                    <tr>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.group_info', report_group_id=seat.company_subscription.report_group.report_group_id)}}#seats">{{seat.company_subscription.report_group.report_group_name}}</td>
+                        <td class="text-right" data-order="{{seat.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{seat.time_created|datetime(format='full')}}">{{seat.time_created|datetime}}</span></td>
+                        <td class="text-right">{{seat.who_created}}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="downloads">
+        <div class="table-responsive">
+            <table class="table table-striped table-responsive table-hover nowrap" id="downloads-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class="all">Document</th>
+                        <th class="min-phone-l">Folder</th>
+                        <th class="min-phone-l">Program</th>
+                        <th class='all text-right sort-by'>Downloaded On</th>
+                        <th class='all text-right no-sort'></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for download in data.user.downloads %}
+                    <tr>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.document_info', document_id=download.document_id)}}">
+                            {% if 'audio' in download.document.document_type %}
+                            <span class="fa fa-fw file-audio fa-file-audio-o" aria-hidden="true"></span>
+                            {% elif 'image' in download.document.document_type %}
+                            <span class="fa fa-fw file-image fa-file-image-o" aria-hidden="true"></span>
+                            {% elif 'pdf' in download.document.document_type %}
+                            <span class="fa fa-fw file-pdf fa-file-pdf-o" aria-hidden="true"></span>
+                            {% elif 'text' in download.document.document_type %}
+                            <span class="fa fa-fw file-text fa-file-text-o" aria-hidden="true"></span>
+                            {% elif 'video' in download.document.document_type %}
+                            <span class="fa fa-fw file-movie fa-file-movie-o" aria-hidden="true"></span>
+                            {% else %}
+                            <span class="fa fa-fw file-other fa-file-code-o" aria-hidden="true"></span>
+                            {% endif %}
+                            {{download.document.document_display_name}}
+                        </td>
+                        {% if download.document.report_folder %}
+                        <td class='search-link' data-search='{{download.document.report_folder.report_folder_name}}'>
+                            {{download.document.report_folder.report_folder_name}}{% if download.document.report_folder.report_group %} ({{download.document.report_folder.report_group.report_group_name}}){% endif %}
+                        </td>
+                        {% else %}
+                        <td class='text-muted'>None</td>
+                        {% endif %}
+                        {% if download.document.program %}
+                        <td class='search-link' data-search='{{download.document.program.program_name}}'>
+                            {{download.document.program.program_name}}
+                        </td>
+                        {% else %}
+                        <td class='text-muted'>
+                            None
+                        </td>
+                        {% endif %}
+                        <td class="text-right" data-order="{{download.downloaded_at|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{download.downloaded_at|datetime(format='full')}}">{{download.downloaded_at|datetime}}</span></td>
+                        <td class='text-right'></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+    <div role="tabpanel" class="tab-pane" id="purchases">
+        <div class="table-responsive">
+            <table class="table table-striped table-responsive table-hover nowrap" id="purchases-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class="all">Document</th>
+                        <th class="all">Order ID</th>
+                        <th class='min-phone-l text-right'>Price</th>
+                        <th class='all text-right sort-by'>Purchased On</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for purchase in data.user.purchases %}
+                    <tr>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.document_info', document_id=purchase.document_id)}}">
+                            {% if 'audio' in purchase.document.document_type %}
+                            <span class="fa fa-fw file-audio fa-file-audio-o" aria-hidden="true"></span>
+                            {% elif 'image' in purchase.document.document_type %}
+                            <span class="fa fa-fw file-image fa-file-image-o" aria-hidden="true"></span>
+                            {% elif 'pdf' in purchase.document.document_type %}
+                            <span class="fa fa-fw file-pdf fa-file-pdf-o" aria-hidden="true"></span>
+                            {% elif 'text' in purchase.document.document_type %}
+                            <span class="fa fa-fw file-text fa-file-text-o" aria-hidden="true"></span>
+                            {% elif 'video' in purchase.document.document_type %}
+                            <span class="fa fa-fw file-movie fa-file-movie-o" aria-hidden="true"></span>
+                            {% else %}
+                            <span class="fa fa-fw file-other fa-file-code-o" aria-hidden="true"></span>
+                            {% endif %}
+                            {{purchase.document.document_display_name}}
+                        </td>
+                        <td><a href="https://dashboard.stripe.com/{% if config.STRIPE_TEST %}test/{% endif %}orders/{{purchase.stripe_order_id}}" target="_blank">{{purchase.stripe_order_id}} <span class="fa fa-external-link" aria-hidden="true"></span></a></td>
+                        <td class="text-right">{{purchase.document.price|currency}}</td>
+                        <td class="text-right" data-order="{{purchase.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{purchase.time_created|datetime(format='full')}}">{{purchase.time_created|datetime}}</span></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<div class="well well-sm">
+    {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+    {% if data.user.review_status == 'PENDING' %}
+    <a href="{{url_for('admin.approve_user', user_id=data.user.id)}}" class="btn btn-success"><span class="fa fa-check" aria-hidden="true"></span> Approve User</a>
+    <a href="{{url_for('admin.deny_user', user_id=data.user.id)}}" class="btn btn-danger" style="margin-right: 12px"><span class="fa fa-times" aria-hidden="true"></span> Deny User</a>
+    {% elif data.user.confirmed_at %}
+    <a href="{{url_for('admin.reset_user_password', user_id=data.user.id)}}" class="btn btn-success"><span class="fa fa-refresh" aria-hidden="true"></span> Reset Password</a>
+    {% else %}
+    <a href="{{url_for('admin.resend_email_confirmation', user_id=data.user.id)}}" class="btn btn-success"><span class="fa fa-refresh" aria-hidden="true"></span> Resend Email Confirmation</a>
+    {% endif %}
+    {% if data.user.stripe_id %}<a href="https://dashboard.stripe.com/{% if config.STRIPE_TEST %}test/{% endif %}customers/{{data.user.stripe_id}}" target="_blank" class="btn btn-info"><span class="fa fa-cc-stripe" aria-hidden="true"></span> View Stripe Profile</a>{% endif %}
+    <a href="{{url_for('admin.new_individual_subscription', user_id=data.user.id)}}" class="btn btn-success"><span class="fa fa-plus-square" aria-hidden="true"></span> Add Subscription</a>
+    {% endif %}
+    <a href="{{url_for('admin.edit_user', user_id=data.user.id)}}" class="btn btn-warning brokeradmin"><span class="fa fa-pencil" aria-hidden="true"></span> Edit User</a>
+    <a href="#" data-href="{{url_for('admin.del_user', user_id=data.user.id)}}" class="btn btn-danger brokeradmin" data-placement='top' data-toggle='confirmation'><span class="fa fa-trash" aria-hidden="true"></span> Delete User</a>
+</div>
+{% endblock %}

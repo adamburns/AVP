@@ -1,0 +1,23 @@
+<script type="text/javascript">
+$(document).ready(function() {
+  $("form ul li").each(function () {
+    $(this).parent().hide();
+    $.growl({
+      title: "<strong>Error: </strong> ",
+      message: $(this).text(),
+    },{
+      type: "danger",
+      delay: 7500,
+      icon_type: 'class',
+      placement: {
+        from: "top",
+        align: "center"
+      },
+      animate: {
+        enter: 'animated fadeInDown',
+        exit: 'animated fadeOutUp'
+      },
+    });
+  });
+});
+</script>

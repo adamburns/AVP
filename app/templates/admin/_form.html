@@ -1,0 +1,24 @@
+{% extends "admin/_base.html" %}
+{% from "_macros.html" import render_field, render_submit %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>{{ title|safe }}</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-1 col-md-9">
+                <form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+                    {% if description %}
+                    <p>{{ description }}</p>
+                    {% endif %}
+                    {% for field in form %}
+                    {{ render_field(field, with_label=true) }}
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

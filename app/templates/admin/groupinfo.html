@@ -1,0 +1,117 @@
+{% extends "admin/_base.html" %}
+{% block title %}{{data.group.report_group_name}}{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Subscription Group Info</h2>
+        </div>
+        <div class="col-md-6">
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation" class="active"><a href="#info" aria-controls="info" role="tab" data-toggle="tab">Info</a></li>
+                <li role="presentation"><a href="#subscriptions" aria-controls="subscriptions" role="tab" data-toggle="tab">Subscribers <span class="badge">{{data.group.subscriptions|length}}</span></a></li>
+                <li role="presentation"><a href="#folders" aria-controls="folders" role="tab" data-toggle="tab">Folders <span class="badge">{{data.group.folders|length}}</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="info-well">
+    <span class="fa-stack fa-2x pull-left role-icon">
+        <i class="fa fa-square fa-stack-2x group-{% if data.group.price > 0 %}paid{% else %}free{% endif %}"></i>
+        <i class="fa fa-filter fa-inverse fa-stack-1x"></i>
+    </span>
+    <h3 class="info-header">{{data.group.report_group_name}}<br/>
+    <small>{% if data.group.price > 0 %}{{data.group.price|currency}}{% else %}Included{% endif %}</small></h3>
+</div>
+<div class="page-content">
+    <div class="container-fluid" role="tabpanel">
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="info">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive nowrap" cellspacing="0" width="100%">
+                        {% if data.group.time_created %}
+                        <tr>
+                            <th>Created on</th>
+                            <td>{{data.group.time_created|datetime(format='pretty')}} by {{data.group.who_created}}</td>
+                        </tr>
+                        {% endif %}
+                        {% if data.group.time_modified %}
+                        <tr>
+                            <th>Last modified</th>
+                            <td>{{data.group.time_modified|datetime(format='pretty')}} by {{data.group.who_modified}}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="subscriptions">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive table-hover nowrap" id="subscriptions-table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="expand-link"></th>
+                                <th>Email</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                {% if data.group.stripe_id %}<th>Stripe ID</th>{% endif %}
+                                <th>Subscribed By</th>
+                                <th class='text-right sort-by'>Subscribed On</th>
+                                <th class='text-right no-sort'></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for subscription in data.group.subscriptions %}
+                            <tr>
+                                <td></td>
+                                <td class="info-link" data-href="{{url_for('admin.user_info', user_id=subscription.user.id)}}#subscriptions">{{subscription.user.email}}</td>
+                                <td>{{subscription.user.first_name}}</td>
+                                <td>{{subscription.user.last_name}}</td>
+                                {% if data.group.stripe_id %}<td>{{subscription.stripe_id or ''}}</td>{% endif %}
+                                <td>{{subscription.who_created}}</td>
+                                <td class="text-right" data-order="{{subscription.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.time_created|datetime(format='full')}}">{{subscription.time_created|datetime}}</span></td>
+                                <td class="text-right"><a href='#' data-href='{{url_for("admin.delete_subscription", subscription_id=subscription.report_subscription_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="folders">
+                <div class="table-responsive">
+                    <table class="table table-striped table-responsive table-hover nowrap" id="folders-table" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="expand-link"></th>
+                                <th>Name</th>
+                                <th class='text-right sort-by'>Created</th>
+                                <th class='text-right no-sort'></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for folder in data.group.folders %}
+                            <tr>
+                                <td></td>
+                                <td class="info-link" data-href="{{url_for('admin.folder_info', report_folder_id=folder.report_folder_id)}}">{{folder.report_folder_name}}</td>
+                                {% if folder.time_created %}
+                                <td class="text-right" data-order="{{folder.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{folder.time_created|datetime(format='full')}}">{{folder.time_created|datetime}}</span></td>
+                                {% else %}
+                                <td class="text-right"></td>
+                                {% endif %}
+                                <td class='text-right'><a href='{{url_for("admin.edit_folder", report_folder_id=folder.report_folder_id)}}' class='action-button btn btn-warning btn-xs'><span class="fa fa-pencil fa-lg fa-fw" aria-hidden="true"></span></a></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="well well-sm">
+    {% if data.group.stripe_id %}
+    <a href="https://dashboard.stripe.com{% if config.STRIPE_TEST %}/test{% endif %}/plans/{{data.group.stripe_id}}" target="_blank" type="submit" class="btn btn-info"><span class="fa fa-cc-stripe" aria-hidden="true"></span> View Stripe Plan</a>
+    {% endif %}
+    <a href="{{url_for('admin.edit_group', report_group_id=data.group.report_group_id)}}" type="submit" class="btn btn-warning"><span class="fa fa-pencil" aria-hidden="true"></span> Edit Group</a>
+    <a href="#" data-href="{{url_for('admin.del_group', report_group_id=data.group.report_group_id)}}" type="submit" class="btn btn-danger" data-placement='top' data-toggle='confirmation'><span class="fa fa-trash" aria-hidden="true"></span> Delete Group</a>
+</div>
+{% endblock %}

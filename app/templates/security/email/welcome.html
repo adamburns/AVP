@@ -1,0 +1,17 @@
+{% extends "security/email/_base.html" %}
+{% block content %}
+<p>{{ user.first_name }},</p>
+<p>Welcome to <b>{{ config.APP_NAME }}</b> - <i>complex product due diligence exclusively focused on the needs of advisors.</i></p>
+
+<p>{{ config.APP_NAME }} helps you to grow your business, diversify your product offerings, all while staying ahead of the regulatory curve. Non-traded REITs and BDCs change rapidly over their offering periods. As they change, so should your understanding of the risks, rewards, and benefits--particularly if you are considering recommending them to your clients.</p>
+
+{% if security.confirmable %}
+<div style="padding-top: 12px; margin-bottom: 12px; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd">
+<p class="action-text">Please confirm your email using the button below:</p>
+
+<p><a href="{{ confirmation_link }}" class='btn'>Confirm my account</a></p>
+</div>
+{% endif %}
+
+<p>To learn more about your annual subscription to {{config.APP_NAME}}, call the {{config.APP_STYLED_NAME}} team at {{config.COMPANY_PHONE}} or visit the <a href="{{url_for('index')}}">{{config.APP_NAME}} website</a> to learn more.
+{% endblock %}

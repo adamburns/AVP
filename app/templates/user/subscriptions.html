@@ -1,0 +1,158 @@
+{% extends "user/_base.html" %}
+{% block title %}Subscriptions{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Report Group Subscriptions</h2>
+</div>
+<div class="page-content no-well">
+    <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+    <div class="table-responsive" id="report_groups-wrapper" style="opacity: 0">
+        <table class="table table-striped table-responsive table-hover nowrap" id="report_groups-table" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class='sort-by sort-asc'>Group</th>
+                    <th class='text-right'>Price</th>
+                    <th class='text-right'>Notifications</th>
+                    <th class='text-right'>Subscription</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for group in data.groups %}
+            {% set subscription = group.get_subscription() %}
+                <tr>
+                    <td>{{group.report_group_name}}</td>
+                    <td class='text-right'>{% if group.price == 0 or not group.price or group.is_free_access() %}Included{% else %}{{group.price|currency}}{% endif %}</td>
+                    <td class='text-right'>
+                        {% if group.is_notification_enabled() %}
+                        <a href='{{url_for("user.disable_notifications_from", group_id=group.report_group_id)}}' data-groupid='{{group.report_group_id}}' class='btn btn-text btn-xs'>Enabled <span class="fa fa-fw fa-envelope" aria-hidden="true"></span></a>
+                        {% else %}
+                        <a href='{{url_for("user.enable_notifications_from", group_id=group.report_group_id)}}' data-groupid='{{group.report_group_id}}' class='btn btn-text btn-xs{% if not group.is_subscribed() and not group.is_free_access() %} disabled{% endif%}'>Disabled <span class="fa fa-fw fa-envelope-o" aria-hidden="true"></span></a>
+                        {% endif %}
+                    </td>
+                    <td class='text-right'>
+                        {% if subscription %}
+                            {% if group.price > 0 %}
+                                {% if subscription.stripe_autorenew %}
+                                <a data-groupid='{{group.report_group_id}}' class='btn btn-text btn-xs' data-placement='left' data-toggle='confirmation' data-title='Cancel and disable auto-renewal?' data-container='body' data-btnOkLabel='Yes' data-btnOkClass='btn btn-sm btn-danger confirm-button' data-btnCancelLabel='No' data-href='javascript:unrenew({{group.report_group_id}})'>Subscribed (will auto-renew {{subscription.current_period_end|datetime}}) <span class="fa fa-fw fa-check-square-o" aria-hidden="true"></span></a>
+                                {% else %}
+                                <a data-groupid='{{group.report_group_id}}' class='btn btn-text btn-xs' data-placement='left' data-toggle='confirmation' data-title='Enable auto-renewal?' data-container='body' data-btnOkLabel='Yes' data-btnOkClass='btn btn-sm btn-success confirm-button' data-btnCancelLabel='No' data-href='javascript:renew({{group.report_group_id}})'>Subscribed (will NOT auto-renew, expires {{subscription.current_period_end|datetime}}) <span class="fa fa-fw fa-check-square-o" aria-hidden="true"></span></a>
+                                {% endif %}
+                            {% else %}
+                            <a href='{{url_for("user.unsubscribe_to", group_id=group.report_group_id)}}' data-groupid='{{group.report_group_id}}' class='btn btn-text btn-xs'>Enabled <span class="fa fa-fw fa-check-square-o" aria-hidden="true"></span></a>
+                            {% endif %}
+                        {% elif group.is_free_access() %}
+                            <span class="text-success"><span class="fa fa-fw fa-check-square"></span> Free Access</span>
+                        {% else %}
+                            {% if group.price > 0 and not group.is_free_access() %}
+                            <a id="purchase{{group.report_group_id}}" class="btn btn-text btn-xs">Purchase Annual Subscription <span class="fa fa-fw fa-credit-card" aria-hidden="true"></span></a>
+                            {% else %}
+                            <a href='{{url_for("user.subscribe_to", group_id=group.report_group_id)}}' data-groupid='{{group.report_group_id}}' class='btn btn-text btn-xs'>Disabled <span class="fa fa-fw fa-square-o" aria-hidden="true"></span></a>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="text-muted side-buffer top-buffer">
+        <p>Subscriptions are valid for one full year of access to all documents within the given report group.</p>
+        <p>Contact <a href="mailto:{{config.CONTACT_EMAIL}}">{{config.CONTACT_EMAIL}}</a> for billing questions and assistance.</p>
+    </div>
+</div>
+<div id="paymentModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <span class="fa fa-circle-o-notch fa-4x fa-spin small-loader" aria-hidden="true"></span>
+                <h2>Processing...</h2>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://checkout.stripe.com/checkout.js"></script>
+<script>
+function showLoader() {
+    $('#paymentModal').modal({
+        backdrop: 'static',
+        keyboard: false
+    });
+}
+
+function renew(groupid) {
+    showLoader();
+    $.getJSON($SCRIPT_ROOT + '{{url_for("user.enable_autorenew_ajax")}}', {
+        groupid: groupid,
+    }, function(data) {
+        location.reload();
+    });
+}
+
+function unrenew(groupid) {
+    showLoader();
+    $.getJSON($SCRIPT_ROOT + '{{url_for("user.disable_autorenew_ajax")}}', {
+        groupid: groupid,
+    }, function(data) {
+        location.reload();
+    });
+}
+
+$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+var groupid = 0;
+var handler = StripeCheckout.configure({
+    key: '{{data.stripepk}}',
+    image: "{{url_for('static', filename='images/stripelogo.png')}}",
+    billingAddress: true,
+    zipCode: true,
+    panelLabel: "Subscribe for {{amount}}",
+    token: function(token) {
+        showLoader();
+        $.getJSON($SCRIPT_ROOT + '{{url_for("user.pay")}}', {
+            groupid: groupid,
+            token: token.id,
+            args: token.args
+        }, function(data) {
+            ga('ecommerce:addTransaction', {
+                'id': data.id,
+                'affiliation': "{{current_user.company.company_name}}",
+                'revenue': data.price,
+            });
+            ga('ecommerce:addItem', {
+                'id': data.id,
+                'name': data.group_name,
+                'sku': data.group_id,
+                'category': 'Report Groups',
+                'price': data.price,
+                'quantity': '1'
+            });
+            ga('ecommerce:send');
+            location.reload();
+        });
+    }
+});
+
+{% for group in data.groups %}
+{% if group.price > 0 %}
+$('#purchase{{group.report_group_id}}').on('click', function(e) {
+    // Open Checkout with further options
+    groupid = {{group.report_group_id}};
+    ga('ecommerce:clear');
+    handler.open({
+        name: "{{group.report_group_name}}",
+        description: '1 year subscription ({{group.price|currency}})',
+        amount: {{group.price * 100}},
+        email: '{{current_user.email}}'
+    });
+    e.preventDefault();
+});
+{% endif %}
+{% endfor %}
+
+// Close Checkout on page navigation
+$(window).on('popstate', function() {
+    handler.close();
+});
+</script>
+{% endblock %}

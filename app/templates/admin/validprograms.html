@@ -1,0 +1,40 @@
+{% extends "admin/_base.html" %}
+{% block title %}Valid Programs{% endblock %}
+{% block content %}
+<div class="page-header">
+    <h2>Valid Programs for {{current_user.company.company_name}}</h2>
+</div>
+<div class="page-content no-well">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-offset-2 col-md-6">
+                <div class="text-muted">
+                    <p>Advisors in your company are allowed to view documents from the following checked (valid) programs:</p>
+                </div>
+                <form class="form-horizontal" role="form" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <ul class="list-group checked-list-box" id="valid_programs">
+                            {% for program in data.programs %}
+                                <li class="list-group-item{% if current_user.has_role('broker') %} disabled{% endif %}" name="valid_programs" value="{{program.program_id}}" {% if program.program_id in data.selected_programs %}data-checked="true" {% endif %}>
+                                    {{program.program_name}}
+                                </li>
+                            {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% if current_user.has_role('superadmin') or current_user.has_role('admin') or current_user.has_role('brokeradmin') %}
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-lg">Update</button>
+                    </div>
+                    {% else %}
+                    <div class="text-muted">
+                        <p>Contact <a href="mailto:{{config.CONTACT_EMAIL}}">{{config.CONTACT_EMAIL}}</a> to add or remove valid programs.</p>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

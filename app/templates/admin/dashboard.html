@@ -1,0 +1,73 @@
+{% extends "admin/_base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    {% if current_user.has_role('superadmin') or current_user.has_role('admin') %}
+    <div class="col-lg-3 col-md-6">
+      <a href="{{url_for('admin.users_list')}}" class="widget-link">
+        <div class="widget-box panel panel-default">
+          <span class="fa fa-users fa-fw fa-4x fa-widget" aria-hidden="true"></span>
+          <p class="widget-data">{{data.totals.users}}</p>
+          <p class="text-muted">Active Users</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <a href="{{url_for('admin.users_list')}}" class="widget-link">
+        <div class="widget-box panel panel-default">
+          <span class="fa fa-user-plus fa-fw fa-4x fa-widget" aria-hidden="true"></span>
+          <p class="widget-data">{{data.totals.pending_users or 'No'}}</p>
+          <p class="text-muted">Pending Users</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <a href="{{url_for('admin.documents_list')}}" class="widget-link">
+        <div class="widget-box panel panel-default">
+          <span class="fa fa-file fa-fw fa-4x fa-widget" aria-hidden="true"></span>
+          <p class="widget-data">{{data.totals.documents}}</p>
+          <p class="text-muted">Documents</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-lg-3 col-md-6">
+      <a href="{{url_for('admin.company_list')}}" class="widget-link">
+        <div class="widget-box panel panel-default">
+          <span class="fa fa-briefcase fa-fw fa-4x fa-widget" aria-hidden="true"></span>
+          <p class="widget-data">{{data.totals.companies}}</p>
+          <p class="text-muted">Broker/Dealers</p>
+        </div>
+      </a>
+    </div>
+    {% else %}
+    <div class="col-md-6">
+      <a href="{{url_for('admin.users_list')}}" class="widget-link">
+        <div class="widget-box panel panel-default">
+          <span class="fa fa-users fa-fw fa-4x fa-widget" aria-hidden="true"></span>
+          <p class="widget-data">{{data.totals.users}}</p>
+          <p class="text-muted">Active Users</p>
+        </div>
+      </a>
+    </div>
+    <div class="col-md-6">
+      <a href="{{url_for('admin.documents_list')}}" class="widget-link">
+        <div class="widget-box panel panel-default">
+          <span class="fa fa-file fa-fw fa-4x fa-widget" aria-hidden="true"></span>
+          <p class="widget-data">{{data.totals.documents}}</p>
+          <p class="text-muted">Documents</p>
+        </div>
+      </a>
+    </div>
+    {% endif %}
+  </div>
+  <div class="row">
+    <div class="col-md-6">
+      {% include 'admin/userslist.html' %}
+    </div>
+    <div class="col-md-6">
+      {% include 'admin/documents.html' %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% if not dashboard %}
+{% extends "admin/_base.html" %}
+{% block title %}Subscriptions{% endblock %}
+{% endif %}
+{% block content %}
+<div class="page-header">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>
+                {% if current_user.has_role('brokeradmin') or current_user.has_role('broker') %}
+                {% if dashboard %}Recent {% else %}{{current_user.company.company_name}}{% endif %} Subscriptions
+                {% else %}
+                {% if dashboard %}Recent {% else %}All{% endif %} Subscriptions
+                {% endif %}
+            </h2>
+        </div>
+        <div class="col-md-6">
+            <ul class="nav nav-pills pull-right">
+                <li role="presentation" class="active"><a href="#companysubscriptions" aria-controls="companysubscriptions" role="tab" data-toggle="tab">Broker/Dealers <span class="badge">{{data.company_subscriptions|length}}</span></a></li>
+                <li role="presentation"><a href="#companydiscounts" aria-controls="companydiscounts" role="tab" data-toggle="tab">Discounts <span class="badge">{{data.company_discounts|length}}</span></a></li>
+                <li role="presentation"><a href="#usersubscriptions" aria-controls="usersubscriptions" role="tab" data-toggle="tab">Individuals <span class="badge">{{data.user_subscriptions|length}}</span></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="page-content tab-content">
+    <div role="tabpanel" class="tab-pane active" id="companysubscriptions">
+        <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+        <div class="table-responsive" id="subscriptions-wrapper" style="opacity: 0">
+            <table class="table table-striped table-responsive table-hover nowrap" id="subscriptions-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class='all'>Broker/Dealer</th>
+                        <th class='all'>Report Group</th>
+                        <th class='none'>Stripe ID</th>
+                        <th class='min-phone-l text-right'>Seats</th>
+                        <th class='min-phone-l text-right'>Cost Per Seat</th>
+                        <th class='min-phone-p text-right'>Period Start</th>
+                        <th class='min-phone-p text-right'>Period End</th>
+                        <th class='min-phone-l text-right sort-by'>Created</th>
+                        <th class='none text-right'>Created By</th>
+                        <th class='all text-right no-sort'></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for subscription in data.company_subscriptions %}
+                    <tr>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.company_info', company_id=subscription.company.company_id)}}#subscriptions">{{subscription.company.company_name}}</td>
+                        <td class="info-link" data-href="{{url_for('admin.group_info', report_group_id=subscription.report_group.report_group_id)}}#subscriptions">{{subscription.report_group.report_group_name}}</td>
+                        <td>{{ subscription.stripe_id or 'N/A' }}</td>
+                        {% if subscription.seats %}
+                        <td class='text-right'>{{ subscription.seats|count }}</td>
+                        {% else %}
+                        <td class='text-right'>Unlimited</td>
+                        {% endif %}
+                        {% if subscription.amount_paid %}
+                        <td class='text-right'>{{subscription.amount_paid|currency}}</td>
+                        {% else %}
+                        <td class='text-right'>Included</td>
+                        {% endif %}
+                        {% if subscription.current_period_start %}
+                        <td class='text-right' data-order="{{subscription.current_period_start|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.current_period_start|datetime(format='full')}}">{{subscription.current_period_start|datetime}}</span></td>
+                        {% else %}
+                        <td class='text-right'>N/A</td>
+                        {% endif %}
+                        {% if subscription.current_period_end %}
+                        <td class='text-right' data-order="{{subscription.current_period_end|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.current_period_end|datetime(format='full')}}">{{subscription.current_period_end|datetime}}</span></td>
+                        {% else %}
+                        <td class='text-right'>N/A</td>
+                        {% endif %}
+                        <td class='text-right' data-order="{{subscription.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.time_created|datetime(format='full')}}">{{subscription.time_created|datetime}}</span></td>
+                        <td class='text-right'>{{subscription.who_created}}</td>
+                        <td class='text-right'>
+                            <a href='#' data-href='{{url_for("admin.delete_company_subscription", subscription_id=subscription.company_subscription_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="companydiscounts">
+        <div class="loader"><span class="fa fa-spinner fa-spin fa-5x"></span></div>
+        <div class="table-responsive" id="company_discounts-wrapper" style="opacity: 0">
+            <table class="table table-striped table-responsive table-hover nowrap" id="company_discounts-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class='all'>Broker/Dealer</th>
+                        <th class='all'>Report Group</th>
+                        <th class='none'>Stripe ID</th>
+                        <th class='min-phone-l text-right'>Price</th>
+                        <th class='min-phone-l text-right sort-by'>Created</th>
+                        <th class='none text-right'>Created By</th>
+                        <th class='all text-right no-sort'></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for company_discount in data.company_discounts %}
+                    <tr>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.company_info', company_id=company_discount.company.company_id)}}#discounts">{{company_discount.company.company_name}}</td>
+                        <td class="info-link" data-href="{{url_for('admin.group_info', report_group_id=company_discount.report_group.report_group_id)}}#subscriptions">{{company_discount.report_group.report_group_name}}</td>
+                        <td>{{ company_discount.stripe_id or 'N/A' }}</td>
+                        {% if company_discount.get_price() > 0 %}
+                        <td class='text-right'><s>{{company_discount.report_group.price|currency}}</s> <strong>{{company_discount.get_price()|currency}}</strong></td>
+                        {% else %}
+                        <td class='text-right'><s>{{company_discount.report_group.price|currency}}</s> <strong>Free</strong></td>
+                        {% endif %}
+                        <td class='text-right' data-order="{{company_discount.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{company_discount.time_created|datetime(format='full')}}">{{company_discount.time_created|datetime}}</span></td>
+                        <td class='text-right'>{{company_discount.who_created}}</td>
+                        <td class='text-right'>
+                            <a href='#' data-href='{{url_for("admin.delete_company_discount", company_discount_id=company_discount.company_discount_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div role="tabpanel" class="tab-pane" id="usersubscriptions">
+        <div class="table-responsive" id="user_subscriptions-wrapper" style="opacity: 0">
+            <table class="table table-striped table-responsive table-hover nowrap" id="user_subscriptions-table" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="all expand-link"></th>
+                        <th class="all">Email</th>
+            			<th class="all">Report Group</th>
+                        <th class="min-phone-p">First Name</th>
+                        <th class="min-phone-p">Last Name</th>
+                        <th class="min-phone-l">Broker/Dealer</th>
+                        <th class='none'>Stripe ID</th>
+                        <th class="min-phone-l text-right">Amount Paid</th>
+                        <th class='min-phone-p text-right'>Period Start</th>
+                        <th class='min-phone-p text-right'>Period End</th>
+                        <th class="min-tablet text-right sort-by">Created</th>
+                        <th class='none text-right'>Created By</th>
+                        <th class="all text-right no-sort"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for subscription in data.user_subscriptions %}
+                    <tr>
+                        <td></td>
+                        <td class="info-link" data-href="{{url_for('admin.user_info', user_id=subscription.user.id)}}#subscriptions">{{subscription.user.email}}</td>
+                        <td class="info-link" data-href="{{url_for('admin.group_info', report_group_id=subscription.report_group.report_group_id)}}#subscriptions">{{subscription.report_group.report_group_name}}</td>
+                        <td>{{subscription.user.first_name}}</td>
+                        <td>{{subscription.user.last_name}}</td>
+                        <td class="search-link" data-search='{{subscription.user.company.company_name}}'>{{subscription.user.company.company_name}}</td>
+                        <td>{{ subscription.stripe_id or 'N/A' }}</td>
+                        <td class="text-right">{{subscription.amount_paid or 'N/A'}}</td>
+                        {% if subscription.current_period_start %}
+                        <td class='text-right' data-order="{{subscription.current_period_start|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.current_period_start|datetime(format='full')}}">{{subscription.current_period_start|datetime}}</span></td>
+                        {% else %}
+                        <td class='text-right'>N/A</td>
+                        {% endif %}
+                        {% if subscription.current_period_end %}
+                        <td class='text-right' data-order="{{subscription.current_period_end|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.current_period_end|datetime(format='full')}}">{{subscription.current_period_end|datetime}}</span></td>
+                        {% else %}
+                        <td class='text-right'>N/A</td>
+                        {% endif %}
+                        <td class="text-right" data-order="{{subscription.time_created|datetime(format='sort')}}"><span data-toggle="tooltip" data-placement="top" title="{{subscription.time_created|datetime(format='full')}}">{{subscription.time_created|datetime}}</span></td>
+                        <td class='text-right'>{{subscription.who_created}}</td>
+                        <td class="text-right">
+                            <a data-href='{{url_for("admin.delete_subscription", subscription_id=subscription.report_subscription_id)}}' class='action-button btn btn-danger btn-xs admin' data-placement='left' data-toggle='confirmation'><span class="fa fa-trash-o fa-lg fa-fw" aria-hidden="true"></span></a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="page-footer">
+    <div class="well well-sm">
+        <a href="{{url_for('admin.new_company_discount')}}" class="btn btn-success admin"><span class="fa fa-plus-square-o" aria-hidden="true"></span> Add Broker/Dealer Discount/Access</a>
+        <a href="{{url_for('admin.new_individual_subscription')}}" class="btn btn-success admin"><span class="fa fa-user-plus" aria-hidden="true"></span> Add Individual Access</a>
+        {% if dashboard %}
+        <a href="{{url_for('admin.subscriptions_list')}}" class="btn btn-info"><span class="fa fa-credit-card-alt" aria-hidden="true"></span> Manage</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
