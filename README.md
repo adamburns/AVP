@@ -1,1 +1,1 @@
-"# AVP" 
+pip install -r requirements.txt
