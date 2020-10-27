@@ -41,7 +41,7 @@ celery==3.1.17
 chardet==2.0.1
 colorama==0.2.5
 colour==0.1.2
-cryptography==0.6.1
+cryptography==3.2
 cssmin==0.2.0
 fpconst==0.7.2
 futures==3.0.4
