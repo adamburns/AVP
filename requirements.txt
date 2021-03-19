@@ -14,7 +14,7 @@ Flask-SQLAlchemy==2.1
 Flask-Security==1.7.5
 Flask-Social==1.6.2
 Flask-WTF==0.12
-Jinja2==2.7.3
+Jinja2==2.11.3
 Mail==2.1.0
 Mako==1.0.3
 MarkupSafe==0.23
