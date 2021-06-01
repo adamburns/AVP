@@ -72,7 +72,7 @@ six==1.5.2
 slacker==0.9.0
 stripe==1.27.0
 urlgrabber==3.9.1
-urllib3==1.7.1
+urllib3==1.26.5
 virtualenv==1.11.4
 webassets==0.11.1
 wsgiref==0.1.2
