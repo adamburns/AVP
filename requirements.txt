@@ -16,7 +16,7 @@ Flask-Social==1.6.2
 Flask-WTF==0.12
 Jinja2==2.7.3
 Mail==2.1.0
-Mako==1.0.3
+Mako==1.2.2
 MarkupSafe==0.23
 MySQL-python==1.2.3
 Pillow==3.1.0
