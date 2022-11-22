@@ -19,7 +19,7 @@ Mail==2.1.0
 Mako==1.0.3
 MarkupSafe==0.23
 MySQL-python==1.2.3
-Pillow==3.1.0
+Pillow==9.3.0
 PyPDF2==1.25.1
 Pygments==1.6
 SQLAlchemy==1.0.11
